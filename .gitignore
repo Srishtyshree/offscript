@@ -26,6 +26,9 @@ training/runs/**/checkpoints/
 training/**/*.safetensors
 training/**/*.bin
 training/.cache/
+training/runs/**/code.diff
+training/runs/**/timing_spans.jsonl
+training/runs/**/train_conversations.jsonl
 
 # Generated (re-created by scripts)
 contract/schema/*.json

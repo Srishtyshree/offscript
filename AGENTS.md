@@ -316,6 +316,11 @@ Run from the repo root. Requires uv, Node 20.19+ and make.
 | `make test` | pytest (api, contract, training) and Vitest; no network |
 | `make test-live` | Network tests: prompt/tokenizer parity with Tinker (needs `training/.env`) |
 | `make smoke-test` | Live Tinker check: sample, tiny train, save (costs cents) |
+| `make check-data` | Validate `train.jsonl` + `test_sealed.jsonl` and fail on any overlap |
+| `make baseline` | Untuned model on the sealed set → `training/runs/baseline` |
+| `make train RUN=<name>` | LoRA fine-tune → `training/runs/<name>` (checkpoints never expire) |
+| `make evaluate RUN=<name> MODEL_PATH=tinker://…` | Tuned model on the sealed set → `training/runs/<name>/eval` |
+| `make report RUN=<name>` | Base vs tuned → `training/runs/REPORT.md` |
 | `make lint` | ruff check and format, oxlint, Prettier, `tsc` |
 | `make format` | Auto-format Python and web |
 
