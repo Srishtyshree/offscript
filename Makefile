@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev dev-api dev-web health smoke-test test test-py test-web lint format
+.PHONY: help install dev dev-api dev-web health smoke-test test test-live test-py test-web lint format
 
 API_PORT ?= 8000
 
@@ -27,6 +27,9 @@ smoke-test: ## Live Tinker check: sample, tiny train, save (needs training/.env,
 	uv run --env-file training/.env python -m offscript_training.smoke_test
 
 test: test-py test-web ## Run all tests
+
+test-live: ## Network tests: renderer/tokenizer parity with Tinker (needs training/.env)
+	uv run --env-file training/.env pytest -m live training
 
 test-py:
 	uv run pytest api contract training
