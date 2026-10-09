@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     def model_configured(self) -> bool:
         return bool(self.tinker_api_key and self.tinker_model_path)
 
+    @property
+    def serpapi_configured(self) -> bool:
+        return bool(self.serpapi_api_key)
+
 
 @lru_cache
 def get_settings() -> Settings:
