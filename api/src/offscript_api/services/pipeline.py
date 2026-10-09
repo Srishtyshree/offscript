@@ -15,15 +15,14 @@ import time
 from offscript_api.clients.serpapi import SerpApiClient
 from offscript_api.config import Settings
 from offscript_api.handlers.ai import handle_ai_route
+from offscript_api.handlers.human import handle_human_route
 from offscript_api.handlers.search import handle_search_route
 from offscript_api.services.safety import check_safety
 from offscript_contract.route_dto import (
-    CardResponse,
     GuardResponse,
-    HumanCardContent,
     RouteResponseUnion,
 )
-from offscript_contract.router import Fit, Route, RouterInput
+from offscript_contract.router import Fit, RouterInput
 
 
 async def run_pipeline(
@@ -84,14 +83,41 @@ async def run_pipeline(
             latency_ms=get_latency(),
         )
 
+    # Stale or conflicting evidence (R24)
+    if "stale" in q_lower or "definitely on" in q_lower:
+        import urllib.parse
+
+        query = router_input.question.replace("?", "").strip()
+        encoded = urllib.parse.quote_plus(query)
+        return GuardResponse(
+            fit="search_limitation",
+            reason="Listing may be stale or conflicting; live confirmation cannot be guaranteed.",
+            message="Evidence is missing, stale, or conflicting. Check public sources directly.",
+            search_url=f"https://www.google.com/search?q={encoded}",
+            request_id=request_id,
+            latency_ms=get_latency(),
+        )
+
     # ── Step 5: Handler ─────────────────────────────────────────────
     human_keywords = [
         "regular",
         "buy",
         "like week to week",
+        "actually like",
         "actually eat",
+        "college club",
         "loop",
         "what is this campus club",
+        "beginner",
+        "first-timer",
+        "sketching group",
+        "maker",
+        "volunteer",
+        "music jam",
+        "book-swap",
+        "book swap",
+        "returning to",
+        "students here",
     ]
     search_keywords = [
         "where",
@@ -106,17 +132,10 @@ async def run_pipeline(
     ]
 
     if any(k in q_lower for k in human_keywords):
-        # Route: HUMAN (Task A04 will expand this handler)
-        return CardResponse(
-            fit=Fit.OK,
-            route=Route.HUMAN,
+        # Route: HUMAN (Task A04 per S11)
+        return handle_human_route(
+            router_input=router_input,
             reason="Lived or tacit knowledge from a plausible person nearby.",
-            content=HumanCardContent(
-                who_to_ask="A regular vendor, player, or community member",
-                suggested_question="What do you usually recommend ordering or trying here?",
-                only_out_there="Tacit experience and personal recommendations.",
-                do_this="Step up to the counter or court and ask politely when it is quiet.",
-            ),
             request_id=request_id,
             latency_ms=get_latency(),
         )

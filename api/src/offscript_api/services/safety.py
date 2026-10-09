@@ -55,13 +55,18 @@ _DANGEROUS_ROUTE_KEYWORDS = [
     "break in",
     "sneak in",
     "climb the fence",
+    "hop the fence",
+    "hop fence",
     "restricted area",
+    "construction site",
+    "locked gate",
 ]
 
 _INTRUSIVE_KEYWORDS = [
     "follow them",
     "follow her",
     "follow him",
+    "follow someone",
     "stalk",
     "harass",
     "woman sitting alone",
@@ -74,6 +79,11 @@ _INTRUSIVE_KEYWORDS = [
     "film without",
     "photograph without",
     "take a picture without",
+    "without consent",
+    "without permission",
+    "secretly record",
+    "secretly photograph",
+    "stranger home",
     "private property",
 ]
 

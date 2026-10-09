@@ -22,6 +22,13 @@ const EXAMPLES: ExamplePrompt[] = [
     icon: '👥',
   },
   {
+    question: 'What is this college club actually like before I go to its meeting?',
+    context: 'Campus club hall',
+    tag: 'human',
+    tagLabel: 'Ask someone',
+    icon: '👥',
+  },
+  {
     question: 'How do beginners join games at this court?',
     context: 'Campus sports court',
     tag: 'human',
@@ -36,8 +43,22 @@ const EXAMPLES: ExamplePrompt[] = [
     icon: '🔍',
   },
   {
+    question: 'Is the museum open today? I want to visit.',
+    context: 'Downtown museum',
+    tag: 'search',
+    tagLabel: 'Find hours',
+    icon: '🔍',
+  },
+  {
     question: 'How do I join a casual pickup game at the court?',
     context: 'Court outing planned',
+    tag: 'ai',
+    tagLabel: 'Know how',
+    icon: '💡',
+  },
+  {
+    question: 'How can I start birdwatching in the park?',
+    context: 'City park',
     tag: 'ai',
     tagLabel: 'Know how',
     icon: '💡',

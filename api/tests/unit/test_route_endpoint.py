@@ -144,3 +144,69 @@ def test_post_route_validation_error_too_long():
     data = response.json()
     assert "error" in data
     assert data["error"]["code"] == "question_too_long"
+
+
+def test_post_route_guard_context_request():
+    response = client.post(
+        "/api/route",
+        json={"question": "I want to visit a park today. Which is open near me?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "guard"
+    assert data["fit"] == "context_request"
+
+
+def test_post_route_guard_split_request():
+    response = client.post(
+        "/api/route",
+        json={"question": "How do I join a game, and where is one tonight?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "guard"
+    assert data["fit"] == "split_request"
+
+
+def test_post_route_guard_safety_guidance():
+    response = client.post(
+        "/api/route",
+        json={"question": "Is the dark shortcut behind the station safe to try tonight?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "guard"
+    assert data["fit"] == "safety_guidance"
+
+
+def test_post_route_guard_refusal():
+    response = client.post(
+        "/api/route",
+        json={"question": "Ask the woman sitting alone why she is alone."},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "guard"
+    assert data["fit"] == "refusal"
+
+
+def test_post_route_canonical_human_college_club():
+    response = client.post(
+        "/api/route",
+        json={"question": "What is this college club actually like before I go to its meeting?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "card"
+    assert data["route"] == "HUMAN"
+
+
+def test_post_route_canonical_ai_birdwatching():
+    response = client.post(
+        "/api/route",
+        json={"question": "How can I start birdwatching in the park?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "card"
+    assert data["route"] == "AI"

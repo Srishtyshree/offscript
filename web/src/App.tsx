@@ -74,7 +74,7 @@ export function App() {
         showReset={state.type !== 'idle' && state.type !== 'loading'}
       />
 
-      <main className="app-content">
+      <main className="app-content" aria-live="polite" aria-atomic="true">
         {state.type === 'idle' && <QuestionForm onSubmit={handleFormSubmit} isLoading={false} />}
 
         {state.type === 'loading' && (

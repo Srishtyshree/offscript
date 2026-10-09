@@ -57,6 +57,9 @@ export const PocketCard: React.FC<PocketCardProps> = ({ card, onReturn }) => {
           <div className="human-question-box pocket-question-box">
             💬 "{(content as HumanContent).suggested_question}"
           </div>
+          <div className="pocket-fallback-note">
+            ℹ️ If no one suitable is available, try later or skip.
+          </div>
         </div>
       )}
 
