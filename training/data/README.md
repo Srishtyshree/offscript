@@ -3,7 +3,7 @@
 | File | Purpose | Written by |
 |---|---|---|
 | `train.jsonl` | Training examples, converted from the team's training dataset | Training data author |
-| `test_sealed.jsonl` | Sealed evaluation set (30–50 rows). Training code must never open it, and prompts must not be tuned on it. | A **different** teammate, kept separate from the training data |
+| `test_sealed.jsonl` | Sealed evaluation set: 30 outdoor + 2 general questions with their correct route. Training code must never open it, and prompts must not be tuned on it. | Model-side author, written after reading the training questions (stated as a caveat in the evaluation report) |
 | `train_annotations.jsonl` | Earlier draft in the old format. **Not used**; removed when the team's dataset arrives. | — |
 
 ## Row format
@@ -11,9 +11,9 @@
 One JSON object per line ([JSONL](https://jsonlines.org/)), defined by `LabelledExample` in `contract/src/offscript_contract/dataset.py`. Each row has the question, the route, a reason, and **only that route's fields**:
 
 ```json
-{"id": "t001", "question": "Why does bread go stale?", "context": "", "route": "AI", "reason": "How bread ages is stable kitchen science.", "answer": "Its starch slowly recrystallises and pushes water out, so the crumb turns firm and dry."}
-{"id": "t002", "question": "Is the planetarium open on Monday?", "context": "Bengaluru", "route": "SEARCH", "reason": "Opening days change, so a current listing is needed.", "search_query": "Bengaluru planetarium opening hours Monday"}
-{"id": "t003", "question": "Where do people usually cast from on this pier?", "context": "on the pier now", "route": "HUMAN", "reason": "Regular anglers here know the spots that work.", "who_to_ask": "a regular angler on the pier", "suggested_question": "Where do you usually like to cast from here?"}
+{"id": "t001", "question": "Why does bread go stale?", "context": "", "route": "AI", "reason": "How bread ages is stable kitchen science.", "answer": "Its starch slowly recrystallises and pushes water out, so the crumb turns firm and dry.", "outdoor_action": "Visit a bakery early and compare a fresh loaf with a day-old one."}
+{"id": "t002", "question": "Is the planetarium open on Monday?", "context": "Bengaluru", "route": "SEARCH", "reason": "Opening days change, so a current listing is needed.", "search_query": "Bengaluru planetarium opening hours Monday", "outdoor_action": "If it is open, visit on Monday and catch one show."}
+{"id": "t003", "question": "Where do people usually cast from on this pier?", "context": "on the pier now", "route": "HUMAN", "reason": "Regular anglers here know the spots that work.", "who_to_ask": "a regular angler on the pier", "suggested_question": "Where do you usually like to cast from here?", "outdoor_action": "When an angler is between casts, ask politely."}
 ```
 
 | Field | Rule |
@@ -27,6 +27,7 @@ One JSON object per line ([JSONL](https://jsonlines.org/)), defined by `Labelled
 | `search_query` (SEARCH only) | One line, at most 200 characters |
 | `who_to_ask` (HUMAN only) | One type of person, never a named or "present" individual; at most 80 characters |
 | `suggested_question` (HUMAN only) | One natural question ending in "?", about 25 words, at most 30 |
+| `outdoor_action` (every route) | One concrete, optional step outside related to the question; one line, at most 35 words |
 
 Safety and refusal questions are **not** included: backend rules catch them before the model. Questions the guard check would stop (missing essential detail, two questions in one) are not router training rows either.
 

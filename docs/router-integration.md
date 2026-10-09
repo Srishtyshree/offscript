@@ -11,9 +11,9 @@ question (+ context)
   3. guard check              → base Qwen3.5-9B, guard.py
        needs_detail / two_questions → show its message, stop
   4. router                   → fine-tuned checkpoint, router.py
-       AI      → show `answer`
+       AI      → show `answer` + `outdoor_action`
        SEARCH  → SerpApi(search_query) → search summary (step 5)
-       HUMAN   → show `who_to_ask`, `suggested_question`, "Go offscript"
+       HUMAN   → show `who_to_ask`, `suggested_question`, `outdoor_action`, "Go offscript"
   5. search summary (SEARCH only) → base Qwen3.5-9B, search_summary.py
 ```
 
@@ -38,6 +38,8 @@ The backend needs `tinker` only, not `tinker-cookbook`, so PyTorch is never inst
 | `AI` | `reason`, `answer` | Answer about 50 words, hard limit 70; plain text or short bullet lines |
 | `SEARCH` | `reason`, `search_query` | Query on one line, up to 200 characters |
 | `HUMAN` | `reason`, `who_to_ask`, `suggested_question` | One person type; one question ending in "?", about 25 words, hard limit 30 |
+
+Every route also has `outdoor_action`: one concrete, optional step outside related to the question (one line, about 35 words at most; conditional for SEARCH). Show it on every result.
 
 The reason is one line, up to 160 characters. Fields for other routes, or any extra field, make the reply invalid.
 

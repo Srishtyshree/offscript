@@ -28,7 +28,8 @@ from offscript_contract.router import (
 FIXTURES = json.loads(
     (Path(__file__).parents[1] / "fixtures" / "router" / "outputs.json").read_text("utf-8")
 )
-HUMAN = {"route": "HUMAN", "reason": "Regulars know.", "who_to_ask": "a regular"}
+ACT = {"outdoor_action": "Go and try it once."}
+HUMAN = {"route": "HUMAN", "reason": "Regulars know.", "who_to_ask": "a regular", **ACT}
 
 
 # --- Output ------------------------------------------------------------------------------
@@ -37,8 +38,8 @@ HUMAN = {"route": "HUMAN", "reason": "Regulars know.", "who_to_ask": "a regular"
 @pytest.mark.parametrize(
     ("payload", "kind"),
     [
-        ({"route": "AI", "reason": "Stable.", "answer": "Do this."}, AIOutput),
-        ({"route": "SEARCH", "reason": "Live.", "search_query": "q"}, SearchOutput),
+        ({"route": "AI", "reason": "Stable.", "answer": "Do this.", **ACT}, AIOutput),
+        ({"route": "SEARCH", "reason": "Live.", "search_query": "q", **ACT}, SearchOutput),
         ({**HUMAN, "suggested_question": "What do you get?"}, HumanOutput),
     ],
 )
@@ -51,10 +52,11 @@ def test_each_route_has_its_own_shape(payload, kind):
 @pytest.mark.parametrize(
     "payload",
     [
-        {"route": "AI", "reason": "x", "search_query": "q"},
-        {"route": "SEARCH", "reason": "x", "answer": "a"},
-        {"route": "HUMAN", "reason": "x", "answer": "a"},
-        {"route": "AI", "reason": "x", "answer": "a", "fit": "ok"},
+        {"route": "AI", "reason": "x", "search_query": "q", **ACT},
+        {"route": "SEARCH", "reason": "x", "answer": "a", **ACT},
+        {"route": "HUMAN", "reason": "x", "answer": "a", **ACT},
+        {"route": "AI", "reason": "x", "answer": "a", "fit": "ok", **ACT},
+        {"route": "AI", "reason": "x", "answer": "a"},
         {"route": "NONE", "reason": "x"},
     ],
 )
@@ -65,23 +67,23 @@ def test_fields_must_belong_to_the_route(payload):
 
 def test_reason_rules():
     ROUTER_OUTPUT.validate_python(
-        {"route": "SEARCH", "reason": "x" * REASON_MAX_CHARS, "search_query": "q"}
+        {"route": "SEARCH", "reason": "x" * REASON_MAX_CHARS, "search_query": "q", **ACT}
     )
     for reason in ["", " padded", "two\nlines", "x" * (REASON_MAX_CHARS + 1)]:
         with pytest.raises(ValueError):
             ROUTER_OUTPUT.validate_python(
-                {"route": "SEARCH", "reason": reason, "search_query": "q"}
+                {"route": "SEARCH", "reason": reason, "search_query": "q", **ACT}
             )
 
 
 def test_answer_word_limit_and_bullets():
     ok = " ".join(["word"] * ANSWER_MAX_WORDS)
-    ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": ok})
-    ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": "- one\n- two"})
+    ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": ok, **ACT})
+    ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": "- one\n- two", **ACT})
     with pytest.raises(ValueError, match="words"):
-        ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": ok + " more"})
+        ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": ok + " more", **ACT})
     with pytest.raises(ValueError):
-        ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": "tab\there"})
+        ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": "tab\there", **ACT})
 
 
 def test_human_question_rules():
@@ -102,13 +104,24 @@ def test_target_json_is_compact_ordered_and_keeps_unicode():
             "suggested_question": "Is the café quiet now?",
             "who_to_ask": "a regular",
             "reason": "Regulars know 🙂.",
+            "outdoor_action": "Go at a quiet hour and see.",
             "route": "HUMAN",
         }
     )
     assert to_target_json(output) == (
         '{"route":"HUMAN","reason":"Regulars know 🙂.","who_to_ask":"a regular",'
-        '"suggested_question":"Is the café quiet now?"}'
+        '"suggested_question":"Is the café quiet now?",'
+        '"outdoor_action":"Go at a quiet hour and see."}'
     )
+
+
+def test_outdoor_action_is_required_and_limited():
+    base = {"route": "SEARCH", "reason": "Live.", "search_query": "q"}
+    ROUTER_OUTPUT.validate_python({**base, "outdoor_action": " ".join(["go"] * 35)})
+    for action in [None, "", "two\nlines", " ".join(["go"] * 36)]:
+        payload = base if action is None else {**base, "outdoor_action": action}
+        with pytest.raises(ValueError):
+            ROUTER_OUTPUT.validate_python(payload)
 
 
 @pytest.mark.parametrize("case", FIXTURES["valid"], ids=lambda case: case["name"])
