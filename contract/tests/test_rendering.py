@@ -87,3 +87,11 @@ def test_decode_stops_at_the_stop_token():
 def test_decode_without_stop_token_is_incomplete():
     tokenizer = FakeTokenizer()
     assert decode_completion(tokenizer, tokenizer.encode('{"a":')) == ('{"a":', False)
+
+
+def test_message_content_is_stripped_like_qwen35():
+    tokenizer = FakeTokenizer()
+    padded = [{"role": "system", "content": "\n  SYS\n"}, {"role": "user", "content": " hi \n"}]
+    clean = [{"role": "system", "content": "SYS"}, {"role": "user", "content": "hi"}]
+    assert render_chat_prompt(tokenizer, padded) == render_chat_prompt(tokenizer, clean)
+    assert render_chat_text(padded) == render_chat_text(clean)

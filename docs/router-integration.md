@@ -29,7 +29,7 @@ At startup, once:
 - Get the tokenizer from it: `sampling_client.get_tokenizer()`. A live test confirms it matches the training tokenizer.
 - Log `router_prompt_version()` and the checkpoint path.
 
-The backend needs `tinker`, not `tinker-cookbook`. The contract's rendering mirrors the cookbook's `qwen3_disable_thinking` renderer token for token (checked by `make test-live`), so PyTorch is never installed on Render.
+The backend needs `tinker`, not `tinker-cookbook`. The contract's rendering mirrors the cookbook's `qwen3_5_disable_thinking` renderer token for token (checked by `make test-live`), so PyTorch is never installed on Render.
 
 ## Pipeline order
 

@@ -144,7 +144,7 @@ scripts/    Repo utilities: schema export, type generation (create when first ne
 |---|---|
 | Frontend | Node 20.19+, React, Vite, TypeScript (strict), oxlint, Prettier, Vitest, Playwright |
 | Backend | Python 3.11+ (3.12 pinned), uv, FastAPI, Pydantic v2, pydantic-settings, async httpx, pytest, ruff |
-| Model | Tinker SDK: LoRA SFT on `Qwen/Qwen3.5-9B` with the `qwen3_5_disable_thinking` renderer; inference samples the saved checkpoint. The backend uses `tinker` only (no `tinker-cookbook`, no PyTorch). Migration from Qwen3-8B is in progress. |
+| Model | Tinker SDK: LoRA SFT on `Qwen/Qwen3.5-9B` with the `qwen3_5_disable_thinking` renderer; inference samples the saved checkpoint. The backend uses `tinker` only (no `tinker-cookbook`, no PyTorch). |
 | Search | SerpApi, backend only |
 | Hosting | Render |
 
@@ -167,7 +167,7 @@ Each step is its own module with its own tests.
    - Network error or timeout: retry once if the time budget allows.
    - Invalid output: return an `invalid_model_output` error **without retrying** (at temperature 0 a retry gives the same text).
    - **Never** fall back to rules or a default route.
-   - **Contract v2 is in progress.** Until it's merged, `contract/` still has the v1 `{fit, route, reason}` schema on Qwen3-8B. Don't build against v1.
+   - **Contract v2 is in progress.** Until it's merged, `contract/` still has the v1 `{fit, route, reason}` schema. Don't build against v1.
 5. **Route step.**
    - `AI`: use the model's `answer`. No live facts.
    - `SEARCH`:
@@ -289,7 +289,7 @@ Do not build any of these:
 
 **Decided** (Oct 9, 2026):
 - **Open-ended scope:** any question is routed. S01's physical-world-only scope is not followed (see A0).
-- **Model:** `Qwen/Qwen3.5-9B` on Tinker, renderer `qwen3_5_disable_thinking`, env vars `TINKER_API_KEY` and `TINKER_MODEL_PATH`. The code still uses Qwen3-8B until the model migration is merged.
+- **Model:** `Qwen/Qwen3.5-9B` on Tinker, renderer `qwen3_5_disable_thinking`, env vars `TINKER_API_KEY` and `TINKER_MODEL_PATH`.
 - **Routes only:** the model returns AI, SEARCH or HUMAN, never a guard. It also writes a reason and the route's F31 fields: `answer`; `search_query`; `who_to_ask` and `suggested_question`.
 - **Guards:** safety and refusal are backend rules before the model; a separate untuned check on the base model runs before routing; `search_limitation` comes from the search step.
 - **The model does not write** S01's "Only out there" or "Do this" lines.

@@ -6,6 +6,7 @@ all go through these functions, so they cannot drift apart.
 """
 
 import json
+import re
 import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
@@ -16,8 +17,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, model_validator
 
-BASE_MODEL = "Qwen/Qwen3-8B"
-RENDERER_NAME = "qwen3_disable_thinking"
+BASE_MODEL = "Qwen/Qwen3.5-9B"
+RENDERER_NAME = "qwen3_5_disable_thinking"
 TEMPERATURE = 0.0
 MAX_TOKENS = 150
 STOP_TOKEN = "<|im_end|>"  # noqa: S105 (a chat marker, not a secret)
@@ -90,12 +91,21 @@ class RouterInput:
     context: str  # NO_CONTEXT when the user gave none
 
 
+# Strings the Qwen3.5 tokenizer treats as control tokens. The cookbook renderer encodes them as
+# real control tokens even inside user text, so they are removed before any rendering.
+CONTROL_TOKEN_PATTERN = re.compile(
+    r"<\|[^<>|\s]{1,40}\|>|</?(?:think|tool_call|tool_response)>|<tts_[a-z_]{1,30}>"
+)
+
+
 def clean_text(text: str) -> str:
-    """NFC-normalise, drop control characters and collapse all whitespace to single spaces.
+    """NFC-normalise, remove control-token strings and control characters, and collapse all
+    whitespace to single spaces.
 
     Collapsing newlines also stops a user from faking a second "Context:" line.
     """
     text = unicodedata.normalize("NFC", text)
+    text = CONTROL_TOKEN_PATTERN.sub(" ", text)
     text = "".join(ch for ch in text if ch.isspace() or unicodedata.category(ch) != "Cc")
     return " ".join(text.split())
 
