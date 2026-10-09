@@ -12,7 +12,6 @@ are flagged for a person. The route and outdoor action always come from S06, nev
 import argparse
 import asyncio
 import json
-import re
 import sys
 from importlib.resources import files
 from pathlib import Path
@@ -28,26 +27,12 @@ from offscript_contract.router import (
     Route,
     clean_text,
 )
+from offscript_training.content_rules import content_problems
 
 CANDIDATES = 4
 TEMPERATURE = 0.7
 MAX_TOKENS = 300
 CONCURRENCY = 8
-ANSWER_SOFT_MAX_WORDS = 60  # stricter than the contract's hard limit, for training targets
-
-# Words that suggest a person is known to be present, which S11 forbids.
-PRESENCE = re.compile(
-    r"\b(currently|right now|standing (?:nearby|there|here)|over there"
-    r"|(?:someone|anyone|a person|people|players?|vendors?|regulars?|members?) "
-    r"(?:nearby|around here))\b",
-    re.I,
-)
-# Live facts an AI answer must never state.
-LIVE_FACT = re.compile(
-    r"\b(\d{1,2}(?::\d{2})?\s?(?:am|pm)|open (?:until|till|from)|closed (?:on|today)"
-    r"|today's|tonight's)\b",
-    re.I,
-)
 GENERATED = {
     Route.AI: ("reason", "answer"),
     Route.SEARCH: ("reason", "search_query"),
@@ -77,25 +62,6 @@ def assemble(row: dict, text: str, complete: bool):
         raise ValueError(f"expected fields {GENERATED[route]}, got {sorted(fields)}")
     payload = {"route": route.value, **fields, "outdoor_action": row["outdoor_action"]}
     return ROUTER_OUTPUT.validate_python(payload)
-
-
-def content_problems(reply) -> list[str]:
-    """Extra rules for training targets, on top of the contract."""
-    problems = []
-    if reply.route is Route.AI:
-        if word_count(reply.answer) > ANSWER_SOFT_MAX_WORDS:
-            problems.append(f"answer over {ANSWER_SOFT_MAX_WORDS} words")
-        if LIVE_FACT.search(reply.answer):
-            problems.append("answer states a live fact")
-    if reply.route is Route.HUMAN:
-        if PRESENCE.search(f"{reply.who_to_ask} {reply.suggested_question}"):
-            problems.append("implies someone is present")
-        if (
-            " and " in reply.suggested_question.lower().split("?")[0]
-            and "," in reply.suggested_question
-        ):
-            problems.append("may be two questions in one")
-    return problems
 
 
 def pick_best(row: dict, candidates: list[tuple[str, bool]]) -> dict:
