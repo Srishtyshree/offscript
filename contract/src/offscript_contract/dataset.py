@@ -15,27 +15,38 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_valida
 
 from offscript_contract.router import (
     NO_CONTEXT,
-    Fit,
+    ROUTER_OUTPUT,
+    AIOutput,
+    HumanOutput,
     InputError,
     Route,
     RouterInput,
-    RouterOutput,
+    SearchOutput,
     normalize_input,
+    to_target_json,
 )
+
+ROUTE_FIELDS = ("answer", "search_query", "who_to_ask", "suggested_question")
 
 
 class LabelledExample(BaseModel):
-    """One JSONL row. `context` is "" when there is none. Text must already be clean,
-    so every file stores questions exactly as the model will see them."""
+    """One JSONL row: the input, the route, a reason and only that route's fields.
+
+    `context` is "" when there is none. Text must already be clean, so every file stores
+    questions exactly as the model will see them.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,40}$")
     question: str
     context: str
-    fit: Fit
-    route: Route | None
+    route: Route
     reason: str
+    answer: str | None = None
+    search_query: str | None = None
+    who_to_ask: str | None = None
+    suggested_question: str | None = None
 
     @model_validator(mode="after")
     def _clean_and_consistent(self) -> "LabelledExample":
@@ -49,7 +60,7 @@ class LabelledExample(BaseModel):
             raise ValueError("context has extra spaces, line breaks or control characters")
         if self.context.lower() == NO_CONTEXT:
             raise ValueError('leave context as "" instead of writing "none"')
-        RouterOutput(fit=self.fit, route=self.route, reason=self.reason)
+        _ = self.label  # validates the route's fields with the router's own rules
         return self
 
     @property
@@ -57,13 +68,18 @@ class LabelledExample(BaseModel):
         return normalize_input(self.question, self.context)
 
     @property
-    def label(self) -> RouterOutput:
-        return RouterOutput(fit=self.fit, route=self.route, reason=self.reason)
+    def label(self) -> AIOutput | SearchOutput | HumanOutput:
+        payload = {"route": self.route.value, "reason": self.reason}
+        payload |= {name: getattr(self, name) for name in ROUTE_FIELDS if getattr(self, name)}
+        return ROUTER_OUTPUT.validate_python(payload)
+
+    @property
+    def target_json(self) -> str:
+        return to_target_json(self.label)
 
     @property
     def category(self) -> str:
-        """AI, SEARCH or HUMAN for outings; the fit value otherwise."""
-        return self.route.value if self.route else self.fit.value
+        return self.route.value
 
 
 @dataclass

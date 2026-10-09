@@ -3,113 +3,136 @@ from pathlib import Path
 
 import pytest
 
+from offscript_contract.parsing import ModelOutputError
 from offscript_contract.router import (
+    ANSWER_MAX_WORDS,
     CONTEXT_MAX,
+    HUMAN_QUESTION_MAX_WORDS,
     NO_CONTEXT,
     QUESTION_MAX,
-    REASON_MAX,
-    Fit,
+    REASON_MAX_CHARS,
+    ROUTER_OUTPUT,
+    AIOutput,
+    HumanOutput,
     InputError,
     Route,
-    RouterOutput,
-    RouterOutputError,
+    SearchOutput,
     build_router_messages,
     load_system_prompt,
     normalize_input,
     parse_router_output,
     router_prompt_version,
+    to_target_json,
 )
 
 FIXTURES = json.loads(
     (Path(__file__).parents[1] / "fixtures" / "router" / "outputs.json").read_text("utf-8")
 )
+HUMAN = {"route": "HUMAN", "reason": "Regulars know.", "who_to_ask": "a regular"}
 
 
-# --- RouterOutput ------------------------------------------------------------------------
+# --- Output ------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
-    ("fit", "route"),
+    ("payload", "kind"),
     [
-        (Fit.OK, Route.AI),
-        (Fit.OK, Route.SEARCH),
-        (Fit.OK, Route.HUMAN),
-        (Fit.SCOPE_NUDGE, None),
-        (Fit.CONTEXT_REQUEST, None),
-        (Fit.SPLIT_REQUEST, None),
+        ({"route": "AI", "reason": "Stable.", "answer": "Do this."}, AIOutput),
+        ({"route": "SEARCH", "reason": "Live.", "search_query": "q"}, SearchOutput),
+        ({**HUMAN, "suggested_question": "What do you get?"}, HumanOutput),
     ],
 )
-def test_every_valid_fit_route_pair(fit, route):
-    output = RouterOutput(fit=fit, route=route, reason="A short reason.")
-    assert parse_router_output(output.to_target_json()) == output
+def test_each_route_has_its_own_shape(payload, kind):
+    output = ROUTER_OUTPUT.validate_python(payload)
+    assert isinstance(output, kind)
+    assert parse_router_output(to_target_json(output)) == output
 
 
 @pytest.mark.parametrize(
-    ("fit", "route"),
-    [(Fit.OK, None), (Fit.SCOPE_NUDGE, Route.AI), (Fit.SPLIT_REQUEST, Route.HUMAN)],
+    "payload",
+    [
+        {"route": "AI", "reason": "x", "search_query": "q"},
+        {"route": "SEARCH", "reason": "x", "answer": "a"},
+        {"route": "HUMAN", "reason": "x", "answer": "a"},
+        {"route": "AI", "reason": "x", "answer": "a", "fit": "ok"},
+        {"route": "NONE", "reason": "x"},
+    ],
 )
-def test_route_must_match_fit(fit, route):
-    with pytest.raises(ValueError, match="route must be set"):
-        RouterOutput(fit=fit, route=route, reason="A short reason.")
-
-
-def test_reason_length_limit():
-    RouterOutput(fit=Fit.OK, route=Route.AI, reason="x" * REASON_MAX)
-    with pytest.raises(ValueError, match="at most"):
-        RouterOutput(fit=Fit.OK, route=Route.AI, reason="x" * (REASON_MAX + 1))
-
-
-@pytest.mark.parametrize("reason", ["", " padded", "padded ", "two\nlines", "tab\there"])
-def test_reason_must_be_one_clean_line(reason):
+def test_fields_must_belong_to_the_route(payload):
     with pytest.raises(ValueError):
-        RouterOutput(fit=Fit.OK, route=Route.AI, reason=reason)
+        ROUTER_OUTPUT.validate_python(payload)
+
+
+def test_reason_rules():
+    ROUTER_OUTPUT.validate_python(
+        {"route": "SEARCH", "reason": "x" * REASON_MAX_CHARS, "search_query": "q"}
+    )
+    for reason in ["", " padded", "two\nlines", "x" * (REASON_MAX_CHARS + 1)]:
+        with pytest.raises(ValueError):
+            ROUTER_OUTPUT.validate_python(
+                {"route": "SEARCH", "reason": reason, "search_query": "q"}
+            )
+
+
+def test_answer_word_limit_and_bullets():
+    ok = " ".join(["word"] * ANSWER_MAX_WORDS)
+    ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": ok})
+    ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": "- one\n- two"})
+    with pytest.raises(ValueError, match="words"):
+        ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": ok + " more"})
+    with pytest.raises(ValueError):
+        ROUTER_OUTPUT.validate_python({"route": "AI", "reason": "x", "answer": "tab\there"})
+
+
+def test_human_question_rules():
+    longest = " ".join(["word"] * (HUMAN_QUESTION_MAX_WORDS - 1)) + " here?"
+    ROUTER_OUTPUT.validate_python({**HUMAN, "suggested_question": longest})
+    for question in [
+        "Tell me.",
+        "Is it good? And cheap?",
+        "word " * HUMAN_QUESTION_MAX_WORDS + "now?",
+    ]:
+        with pytest.raises(ValueError):
+            ROUTER_OUTPUT.validate_python({**HUMAN, "suggested_question": question})
 
 
 def test_target_json_is_compact_ordered_and_keeps_unicode():
-    output = RouterOutput(fit=Fit.OK, route=Route.SEARCH, reason="The café opens late 🙂.")
-    assert output.to_target_json() == (
-        '{"fit":"ok","route":"SEARCH","reason":"The café opens late 🙂."}'
+    output = ROUTER_OUTPUT.validate_python(
+        {
+            "suggested_question": "Is the café quiet now?",
+            "who_to_ask": "a regular",
+            "reason": "Regulars know 🙂.",
+            "route": "HUMAN",
+        }
     )
-    guard = RouterOutput(fit=Fit.SCOPE_NUDGE, route=None, reason="Screen-complete.")
-    assert (
-        guard.to_target_json() == '{"fit":"scope_nudge","route":null,"reason":"Screen-complete."}'
+    assert to_target_json(output) == (
+        '{"route":"HUMAN","reason":"Regulars know 🙂.","who_to_ask":"a regular",'
+        '"suggested_question":"Is the café quiet now?"}'
     )
-
-
-# --- Parser ------------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("case", FIXTURES["valid"], ids=lambda case: case["name"])
 def test_valid_fixtures_parse(case):
-    assert isinstance(parse_router_output(case["text"]), RouterOutput)
+    assert parse_router_output(case["text"]).route in Route
 
 
 @pytest.mark.parametrize("case", FIXTURES["invalid"], ids=lambda case: case["name"])
 def test_invalid_fixtures_fail_with_expected_code(case):
-    with pytest.raises(RouterOutputError) as error:
+    with pytest.raises(ModelOutputError) as error:
         parse_router_output(case["text"])
     assert error.value.code == case["code"]
 
 
-def test_fixtures_cover_every_error_code():
-    assert {case["code"] for case in FIXTURES["invalid"]} == set(RouterOutputError.CODES)
-
-
-def test_fixtures_cover_every_valid_pair():
-    pairs = {
-        (output.fit, output.route)
-        for output in (parse_router_output(case["text"]) for case in FIXTURES["valid"])
-    }
-    assert len(pairs) == 6
+def test_fixtures_cover_every_error_code_and_route():
+    assert {case["code"] for case in FIXTURES["invalid"]} == set(ModelOutputError.CODES)
+    assert {parse_router_output(case["text"]).route for case in FIXTURES["valid"]} == set(Route)
 
 
 def test_hitting_the_token_limit_is_always_truncated():
-    with pytest.raises(RouterOutputError) as error:
-        parse_router_output('{"fit":"ok","route":"AI","reason":"x"} and then', complete=False)
-    assert error.value.code == "truncated"
-    with pytest.raises(RouterOutputError) as error:
-        parse_router_output("", complete=False)
-    assert error.value.code == "truncated"
+    for text in ['{"route":"SEARCH","reason":"x","search_query":"q"} and then', ""]:
+        with pytest.raises(ModelOutputError) as error:
+            parse_router_output(text, complete=False)
+        assert error.value.code == "truncated"
 
 
 # --- Input -------------------------------------------------------------------------------
@@ -177,7 +200,7 @@ def test_messages_have_the_exact_shape():
 
 def test_system_prompt_loads_and_version_is_stable():
     prompt = load_system_prompt()
-    assert '{"fit":' in prompt
+    assert '{"route":"AI"' in prompt
     assert len(router_prompt_version()) == 12
     assert router_prompt_version() == router_prompt_version()
 
@@ -186,11 +209,10 @@ def test_system_prompt_examples_are_valid_outputs():
     lines = [
         line
         for line in load_system_prompt().splitlines()
-        if line.startswith('{"fit":"') and "<fit>" not in line
+        if line.startswith('{"route":"') and "<" not in line
     ]
-    assert len(lines) >= 4
-    for line in lines:
-        parse_router_output(line)
+    assert len(lines) >= 3
+    assert {parse_router_output(line).route for line in lines} == set(Route)
 
 
 @pytest.mark.parametrize(

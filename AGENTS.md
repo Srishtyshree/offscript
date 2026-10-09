@@ -72,7 +72,7 @@ Every result has the **route** and a one-sentence **reason** (F09), plus the rou
 |---|---|---|
 | `safety_guidance` | Medical, mental-health, legal, emergency or personal-safety questions (F22) | Backend rules, **before** the model |
 | `refusal` | Harassment, intrusive personal questions, discriminatory targeting, unsafe or prohibited actions (F23) | Backend rules, **before** the model |
-| Guard check | A question that can't be routed as asked, for example missing essential detail or two questions in one | A **separate untuned** prompt on base Qwen3.5-9B, before routing. Exact scope still open (B12) |
+| Guard check | A question that can't be routed as asked, for example missing essential detail or two questions in one | A **separate untuned** prompt on base Qwen3.5-9B, before routing (`contract/.../guard.py`) |
 | `search_limitation` | SerpApi unavailable, no useful result, quota exhausted, or conflicting results (F16) | Search step, after routing |
 
 There is no scope nudge: any safe question is routed.
@@ -167,12 +167,12 @@ Each step is its own module with its own tests.
    - Network error or timeout: retry once if the time budget allows.
    - Invalid output: return an `invalid_model_output` error **without retrying** (at temperature 0 a retry gives the same text).
    - **Never** fall back to rules or a default route.
-   - **Contract v2 is in progress.** Until it's merged, `contract/` still has the v1 `{fit, route, reason}` schema. Don't build against v1.
 5. **Route step.**
    - `AI`: use the model's `answer`. No live facts.
    - `SEARCH`:
      - Call SerpApi with the model's `search_query`.
-     - Return titles and URLs exactly as SerpApi gave them, with a short summary only where the results support it.
+     - Return titles and URLs exactly as SerpApi gave them.
+     - Summarise with the untuned search-summary prompt (`search_summary.py`), check it with `ungrounded_numbers`, and show the optional local tip.
      - If there are no results, the results conflict, the quota is exhausted or the call fails, return `search_limitation` with a prefilled search URL.
    - `HUMAN`: use the model's `who_to_ask` and `suggested_question` (a person type, a question under 20 words).
 6. **Result validation.**
@@ -293,12 +293,12 @@ Do not build any of these:
 - **Routes only:** the model returns AI, SEARCH or HUMAN, never a guard. It also writes a reason and the route's F31 fields: `answer`; `search_query`; `who_to_ask` and `suggested_question`.
 - **Guards:** safety and refusal are backend rules before the model; a separate untuned check on the base model runs before routing; `search_limitation` comes from the search step.
 - **The model does not write** S01's "Only out there" or "Do this" lines.
+- **Guard check** (model side, `guard.py`): catches missing essential details and two questions in one, and writes a short message to the user.
+- **Lengths:** AI answer about 50 words (hard limit 70); HUMAN question about 25 words (hard limit 30).
+- **SEARCH:** an untuned summary prompt (model side, `search_summary.py`) writes a grounded short answer from the results plus an optional local tip about local experience; numbers are checked against the cited result.
 - **Training data** is the team's dataset, shared by its author. The earlier draft (`training/data/train_annotations.jsonl`) is removed at the data step.
 
 **Still open** (ask before assuming):
-- Guard check: exactly what it decides (missing detail, two questions in one, anything else) and who owns its prompt.
-- Maximum length of the AI `answer`.
-- Who writes the SEARCH summary prompt (untuned) after SerpApi returns.
 - The full `POST /api/route` response shapes (result, guard, error) in `contract/`, backend-led.
 - The router system prompt is a draft until it's frozen before the baseline run.
 
