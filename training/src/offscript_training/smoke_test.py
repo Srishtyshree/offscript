@@ -28,23 +28,26 @@ CHECKPOINT_TTL_SECONDS = 24 * 3600  # throwaway checkpoint: auto-deleted after a
 SYSTEM_PROMPT = (
     'Reply only with JSON: {"route": "AI"|"SEARCH"|"HUMAN", "reason": "<one sentence>", '
     'plus "answer" for AI, "search_query" for SEARCH, or "who_to_ask" and '
-    '"suggested_question" for HUMAN}'
+    '"suggested_question" for HUMAN, plus "outdoor_action"}'
 )
 EXAMPLES = [
     (
         "Question: What do regulars buy at this stall?\nContext: at the outdoor market",
         '{"route":"HUMAN","reason":"Regulars know what is good here.",'
-        '"who_to_ask":"a regular customer","suggested_question":"What do you usually get here?"}',
+        '"who_to_ask":"a regular customer","suggested_question":"What do you usually get here?",'
+        '"outdoor_action":"Ask a willing regular, then try it."}',
     ),
     (
         "Question: Is the museum open today? I want to visit.\nContext: none",
         '{"route":"SEARCH","reason":"Opening hours change and need a live source.",'
-        '"search_query":"museum opening hours today"}',
+        '"search_query":"museum opening hours today",'
+        '"outdoor_action":"If it is open, visit today."}',
     ),
     (
         "Question: What is photosynthesis?\nContext: none",
         '{"route":"AI","reason":"This is stable textbook knowledge.",'
-        '"answer":"Plants use sunlight, water and carbon dioxide to make sugar and oxygen."}',
+        '"answer":"Plants use sunlight, water and carbon dioxide to make sugar and oxygen.",'
+        '"outdoor_action":"Look closely at a leaf in sunlight on your next walk."}',
     ),
 ]
 

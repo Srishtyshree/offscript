@@ -1,0 +1,32 @@
+{"id": "s001", "question": "What's the right way to hold a cricket bat for my first session at the nets?", "context": "", "route": "AI", "kind": "outdoor"}
+{"id": "s002", "question": "Going rowing on the lake for the first time tomorrow. How do I step into the boat without tipping it?", "context": "", "route": "AI", "kind": "outdoor"}
+{"id": "s003", "question": "On my morning walk, how can I tell a neem tree apart from a peepal tree?", "context": "Cubbon Park", "route": "AI", "kind": "outdoor"}
+{"id": "s004", "question": "How do I pitch a two-person tent on uneven ground?", "context": "camping at the hill campsite this weekend", "route": "AI", "kind": "outdoor"}
+{"id": "s005", "question": "My niece is learning to ride a bicycle without training wheels in our colony lane. How should we start?", "context": "", "route": "AI", "kind": "outdoor"}
+{"id": "s006", "question": "Any trick to tell if a mango is ripe without squeezing it hard?", "context": "at a fruit cart in Crawford Market now", "route": "AI", "kind": "outdoor"}
+{"id": "s007", "question": "How do I keep my phone dry while cycling in the rain?", "context": "", "route": "AI", "kind": "outdoor"}
+{"id": "s008", "question": "How should I warm up before a 5-a-side football game?", "context": "Powai turf, playing at 7 pm", "route": "AI", "kind": "outdoor"}
+{"id": "s009", "question": "What should I check on a tide table before going rock-pooling?", "context": "Alibaug beach this weekend", "route": "AI", "kind": "outdoor"}
+{"id": "s010", "question": "How can I find Orion in the night sky?", "context": "on my terrace tonight", "route": "AI", "kind": "outdoor"}
+{"id": "s011", "question": "Does the zoo open on Tuesdays?", "context": "Mysuru", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s012", "question": "What time is sunrise at Nandi Hills this Saturday?", "context": "", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s013", "question": "How much is a boat ride ticket at the lake?", "context": "the city lake boathouse", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s014", "question": "Is the beach festival on this weekend?", "context": "Juhu", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s015", "question": "How do I book a slot at the cricket nets in the sports complex?", "context": "Pune", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s016", "question": "Will Marine Drive be closed for the marathon on Sunday morning?", "context": "", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s017", "question": "What's the entry fee at the butterfly park?", "context": "the state butterfly park", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s018", "question": "Which weekend is the mango festival on this year?", "context": "Lucknow", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s019", "question": "How do I get a permit to camp on the beach?", "context": "Gokarna", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s020", "question": "Is the stepwell open to visitors again after the restoration?", "context": "Adalaj, Ahmedabad", "route": "SEARCH", "kind": "outdoor"}
+{"id": "s021", "question": "Which net do the regular bowlers here usually leave free for beginners?", "context": "at the Shivaji Park cricket nets now", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s022", "question": "Can I join the 5-a-side game if they're one player short?", "context": "at the turf now", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s023", "question": "Where on the hill do people who come at dawn like to watch the sunrise from?", "context": "at Nandi Hills now", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s024", "question": "Which fruit cart in this lane do people around here trust for mangoes?", "context": "walking down the market lane", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s025", "question": "How do the boatmen here decide whose turn it is when there's a queue?", "context": "at the Ulsoor Lake jetty", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s026", "question": "What do people who camp here often wish they had brought?", "context": "at the Gokarna beach campsite", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s027", "question": "May I photograph the rangoli outside this shop?", "context": "walking past the shop", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s028", "question": "How do I find out which bench the morning laughter club meets at?", "context": "at the park gate early morning", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s029", "question": "Is it okay to climb down to the lowest level of the stepwell?", "context": "at the stepwell now", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s030", "question": "Which mango variety are people here most excited about this season?", "context": "at the Lucknow mango festival", "route": "HUMAN", "kind": "outdoor"}
+{"id": "s031", "question": "Why does the moon look bigger near the horizon?", "context": "", "route": "AI", "kind": "general"}
+{"id": "s032", "question": "Who won the most recent women's T20 World Cup?", "context": "", "route": "SEARCH", "kind": "general"}

@@ -23,7 +23,7 @@ from offscript_contract.parsing import ModelOutputError, check_text, parse_model
 BASE_MODEL = "Qwen/Qwen3.5-9B"
 RENDERER_NAME = "qwen3_5_disable_thinking"
 TEMPERATURE = 0.0
-MAX_TOKENS = 300
+MAX_TOKENS = 350
 STOP_TOKEN = "<|im_end|>"  # noqa: S105 (a chat marker, not a secret)
 
 QUESTION_MAX = 300
@@ -39,6 +39,8 @@ WHO_TO_ASK_MAX_CHARS = 80
 HUMAN_QUESTION_TARGET_WORDS = 25
 HUMAN_QUESTION_MAX_WORDS = 30
 HUMAN_QUESTION_MAX_CHARS = 220
+OUTDOOR_ACTION_MAX_WORDS = 35
+OUTDOOR_ACTION_MAX_CHARS = 240
 
 
 class Route(StrEnum):
@@ -51,11 +53,19 @@ class _RouterReply(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     reason: str
+    outdoor_action: str  # one concrete step outside, on every route
 
     @field_validator("reason")
     @classmethod
     def _reason(cls, value: str) -> str:
         return check_text(value, max_chars=REASON_MAX_CHARS)
+
+    @field_validator("outdoor_action")
+    @classmethod
+    def _outdoor_action(cls, value: str) -> str:
+        return check_text(
+            value, max_chars=OUTDOOR_ACTION_MAX_CHARS, max_words=OUTDOOR_ACTION_MAX_WORDS
+        )
 
 
 class AIOutput(_RouterReply):
@@ -102,9 +112,9 @@ class HumanOutput(_RouterReply):
 RouterOutput = Annotated[AIOutput | SearchOutput | HumanOutput, Field(discriminator="route")]
 ROUTER_OUTPUT = TypeAdapter(RouterOutput)
 _FIELD_ORDER = {
-    Route.AI: ("route", "reason", "answer"),
-    Route.SEARCH: ("route", "reason", "search_query"),
-    Route.HUMAN: ("route", "reason", "who_to_ask", "suggested_question"),
+    Route.AI: ("route", "reason", "answer", "outdoor_action"),
+    Route.SEARCH: ("route", "reason", "search_query", "outdoor_action"),
+    Route.HUMAN: ("route", "reason", "who_to_ask", "suggested_question", "outdoor_action"),
 }
 
 
