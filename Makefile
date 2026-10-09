@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev dev-api dev-web health test test-py test-web lint format
+.PHONY: help install dev dev-api dev-web health smoke-test test test-py test-web lint format
 
 API_PORT ?= 8000
 
@@ -22,6 +22,9 @@ dev-web: ## Run the web dev server on :5173
 
 health: ## Check the running API's /health
 	curl -fsS http://localhost:$(API_PORT)/health && echo
+
+smoke-test: ## Live Tinker check: sample, tiny train, save (needs training/.env, costs cents)
+	uv run --env-file training/.env python -m offscript_training.smoke_test
 
 test: test-py test-web ## Run all tests
 

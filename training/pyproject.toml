@@ -3,8 +3,12 @@ name = "offscript-training"
 version = "0.1.0"
 description = "Offscript datasets, Tinker LoRA fine-tuning and evaluation (offline only)."
 requires-python = ">=3.11"
-# Add the Tinker SDK when the training task starts. Never import offscript_api.
-dependencies = ["offscript-contract"]
+# Never import offscript_api.
+dependencies = [
+    "offscript-contract",
+    "tinker>=0.33.1",
+    "tinker-cookbook>=0.5.7",
+]
 
 [build-system]
 requires = ["hatchling"]
