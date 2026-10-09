@@ -251,3 +251,13 @@ def test_control_token_strings_are_removed(token):
 
 def test_ordinary_angle_brackets_are_kept():
     assert normalize_input("Is 3 < 5 and is <b> a tag?").question == "Is 3 < 5 and is <b> a tag?"
+
+
+def test_router_prompt_is_frozen():
+    from offscript_contract.router import FROZEN_ROUTER_PROMPT_VERSION
+
+    assert router_prompt_version() == FROZEN_ROUTER_PROMPT_VERSION, (
+        "The router prompt is frozen: the baseline and the fine-tuned checkpoint were made with "
+        "it. Changing it means re-running the baseline and the training, then updating "
+        "FROZEN_ROUTER_PROMPT_VERSION."
+    )
