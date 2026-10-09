@@ -1,8 +1,9 @@
 """Router contract shared by training and the backend.
 
-One definition of the router's input (cleanup, limits, messages), its output (RouterOutput)
-and how raw model text is parsed. Training, evaluation, the live API and the mock router
-all go through these functions, so they cannot drift apart.
+One definition of the router's input (cleanup, limits, messages), its output (one reply per
+route: AI, SEARCH or HUMAN, with the Feature List fields) and how raw model text is parsed.
+Training, evaluation, the live API and the mock router all go through these functions, so they
+cannot drift apart.
 """
 
 import json
@@ -13,27 +14,31 @@ from enum import StrEnum
 from functools import cache
 from hashlib import sha256
 from importlib.resources import files
-from typing import Any
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator
+
+from offscript_contract.parsing import ModelOutputError, check_text, parse_model_json
 
 BASE_MODEL = "Qwen/Qwen3.5-9B"
 RENDERER_NAME = "qwen3_5_disable_thinking"
 TEMPERATURE = 0.0
-MAX_TOKENS = 150
+MAX_TOKENS = 300
 STOP_TOKEN = "<|im_end|>"  # noqa: S105 (a chat marker, not a secret)
 
 QUESTION_MAX = 300
 CONTEXT_MAX = 200
-REASON_MAX = 160
 NO_CONTEXT = "none"
 
-
-class Fit(StrEnum):
-    OK = "ok"
-    SCOPE_NUDGE = "scope_nudge"
-    CONTEXT_REQUEST = "context_request"
-    SPLIT_REQUEST = "split_request"
+REASON_MAX_CHARS = 160
+ANSWER_TARGET_WORDS = 50  # prompt and evaluation target
+ANSWER_MAX_WORDS = 70  # hard limit: longer replies are invalid
+ANSWER_MAX_CHARS = 700
+SEARCH_QUERY_MAX_CHARS = 200
+WHO_TO_ASK_MAX_CHARS = 80
+HUMAN_QUESTION_TARGET_WORDS = 25
+HUMAN_QUESTION_MAX_WORDS = 30
+HUMAN_QUESTION_MAX_CHARS = 220
 
 
 class Route(StrEnum):
@@ -42,36 +47,72 @@ class Route(StrEnum):
     HUMAN = "HUMAN"
 
 
-class RouterOutput(BaseModel):
-    """The tuned model's whole answer. `route` is set exactly when `fit` is ok."""
-
+class _RouterReply(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    fit: Fit
-    route: Route | None
     reason: str
 
     @field_validator("reason")
     @classmethod
-    def _one_clean_line(cls, reason: str) -> str:
-        if not reason or reason != reason.strip():
-            raise ValueError("reason must be non-empty with no leading or trailing spaces")
-        if any(unicodedata.category(ch) == "Cc" for ch in reason):
-            raise ValueError("reason must be a single line without control characters")
-        if len(reason) > REASON_MAX:
-            raise ValueError(f"reason must be at most {REASON_MAX} characters")
-        return reason
+    def _reason(cls, value: str) -> str:
+        return check_text(value, max_chars=REASON_MAX_CHARS)
 
-    @model_validator(mode="after")
-    def _route_matches_fit(self) -> "RouterOutput":
-        if (self.fit is Fit.OK) != (self.route is not None):
-            raise ValueError("route must be set when fit is ok, and null otherwise")
-        return self
 
-    def to_target_json(self) -> str:
-        """Canonical training answer: compact, fixed key order, characters kept as written."""
-        payload = {"fit": self.fit.value, "route": self.route, "reason": self.reason}
-        return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+class AIOutput(_RouterReply):
+    route: Literal[Route.AI]
+    answer: str
+
+    @field_validator("answer")
+    @classmethod
+    def _answer(cls, value: str) -> str:
+        return check_text(
+            value, max_chars=ANSWER_MAX_CHARS, max_words=ANSWER_MAX_WORDS, multiline=True
+        )
+
+
+class SearchOutput(_RouterReply):
+    route: Literal[Route.SEARCH]
+    search_query: str
+
+    @field_validator("search_query")
+    @classmethod
+    def _query(cls, value: str) -> str:
+        return check_text(value, max_chars=SEARCH_QUERY_MAX_CHARS)
+
+
+class HumanOutput(_RouterReply):
+    route: Literal[Route.HUMAN]
+    who_to_ask: str
+    suggested_question: str
+
+    @field_validator("who_to_ask")
+    @classmethod
+    def _who(cls, value: str) -> str:
+        return check_text(value, max_chars=WHO_TO_ASK_MAX_CHARS)
+
+    @field_validator("suggested_question")
+    @classmethod
+    def _question(cls, value: str) -> str:
+        check_text(value, max_chars=HUMAN_QUESTION_MAX_CHARS, max_words=HUMAN_QUESTION_MAX_WORDS)
+        if not value.endswith("?") or value.count("?") != 1:
+            raise ValueError("must be exactly one question ending with '?'")
+        return value
+
+
+RouterOutput = Annotated[AIOutput | SearchOutput | HumanOutput, Field(discriminator="route")]
+ROUTER_OUTPUT = TypeAdapter(RouterOutput)
+_FIELD_ORDER = {
+    Route.AI: ("route", "reason", "answer"),
+    Route.SEARCH: ("route", "reason", "search_query"),
+    Route.HUMAN: ("route", "reason", "who_to_ask", "suggested_question"),
+}
+
+
+def to_target_json(output: AIOutput | SearchOutput | HumanOutput) -> str:
+    """Canonical training answer: compact, fixed key order, characters kept as written."""
+    data = output.model_dump(mode="json")
+    payload = {key: data[key] for key in _FIELD_ORDER[output.route]}
+    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
 
 # --- Input -----------------------------------------------------------------------------
@@ -128,15 +169,22 @@ def format_user_message(router_input: RouterInput) -> str:
 
 
 @cache
+def load_prompt(name: str) -> str:
+    return files("offscript_contract").joinpath(f"prompts/{name}.md").read_text("utf-8")
+
+
+def prompt_version(name: str) -> str:
+    """Short hash of a prompt file. A checkpoint is only valid with the router prompt it was
+    trained on, so the router's version travels with every checkpoint handover."""
+    return sha256(load_prompt(name).encode("utf-8")).hexdigest()[:12]
+
+
 def load_system_prompt() -> str:
-    return files("offscript_contract").joinpath("prompts/router_system.md").read_text("utf-8")
+    return load_prompt("router_system")
 
 
-@cache
 def router_prompt_version() -> str:
-    """Short hash of the system prompt. A checkpoint is only valid with the prompt it was
-    trained on, so this travels with every checkpoint handover."""
-    return sha256(load_system_prompt().encode("utf-8")).hexdigest()[:12]
+    return prompt_version("router_system")
 
 
 def build_router_messages(question: str, context: str | None = None) -> list[dict[str, str]]:
@@ -149,72 +197,11 @@ def build_router_messages(question: str, context: str | None = None) -> list[dic
 
 # --- Output ----------------------------------------------------------------------------
 
-
-class RouterOutputError(ValueError):
-    """Raw model text that is not a valid RouterOutput. Never repaired, never retried."""
-
-    CODES = (
-        "empty",
-        "not_json",
-        "extra_text",
-        "duplicate_keys",
-        "schema",
-        "inconsistent",
-        "truncated",
-    )
-
-    def __init__(self, code: str, message: str):
-        assert code in self.CODES, code
-        super().__init__(message)
-        self.code = code
+RouterOutputError = ModelOutputError
 
 
-class _DuplicateKeyError(ValueError):
-    pass
-
-
-def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-    keys = [key for key, _ in pairs]
-    if len(keys) != len(set(keys)):
-        raise _DuplicateKeyError(keys)
-    return dict(pairs)
-
-
-_DECODER = json.JSONDecoder(object_pairs_hook=_reject_duplicate_keys)
-
-
-def parse_router_output(text: str, *, complete: bool = True) -> RouterOutput:
-    """Parse raw model text strictly: exactly one JSON object, optional surrounding whitespace.
-
-    `complete=False` means generation stopped at the token limit instead of the stop token,
-    so any failure is reported as `truncated`.
-    """
-    stripped = text.strip()
-    if not stripped:
-        raise RouterOutputError("truncated" if not complete else "empty", "model returned nothing")
-
-    def fail(code: str, message: str) -> RouterOutputError:
-        return RouterOutputError("truncated" if not complete else code, message)
-
-    if not stripped.startswith("{"):
-        code = "extra_text" if "{" in stripped else "not_json"
-        raise fail(code, "reply does not start with a JSON object")
-    try:
-        data, end = _DECODER.raw_decode(stripped)
-    except _DuplicateKeyError as error:
-        raise fail("duplicate_keys", f"duplicate keys in {error.args[0]}") from None
-    except json.JSONDecodeError as error:
-        code = "not_json" if stripped.endswith("}") else "truncated"
-        raise fail(code, f"invalid JSON: {error.msg}") from None
-    if stripped[end:].strip():
-        raise fail("extra_text", "text after the JSON object")
-    if not isinstance(data, dict):
-        raise fail("schema", "reply is not a JSON object")
-
-    try:
-        return RouterOutput.model_validate(data)
-    except ValidationError as error:
-        # Field-level problems carry a location; the fit/route rule is model-level (loc ()).
-        problems = error.errors()
-        code = "inconsistent" if all(problem["loc"] == () for problem in problems) else "schema"
-        raise fail(code, "; ".join(problem["msg"] for problem in problems)) from None
+def parse_router_output(
+    text: str, *, complete: bool = True
+) -> AIOutput | SearchOutput | HumanOutput:
+    """Parse raw router text strictly into one route's reply. See parsing.parse_model_json."""
+    return parse_model_json(text, ROUTER_OUTPUT, complete=complete)

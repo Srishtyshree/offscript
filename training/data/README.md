@@ -2,41 +2,33 @@
 
 | File | Purpose | Written by |
 |---|---|---|
-| `train.jsonl` | Training examples (120–150 rows) | Training data author, from the labelling guide |
-| `test_sealed.jsonl` | Sealed evaluation set (30–50 rows). Training code must never open it, and prompts must not be tuned on it. | A **different** teammate, before the training data exists |
-
-## Annotation file (what reviewers edit)
-
-`train_annotations.jsonl` follows the labelling guide's annotation record, plus two fields for non-fit rows and review:
-
-```json
-{"id": "t001", "question": "...", "context": "", "outdoor_goal_fit": true, "route": "AI", "guard": null, "reason": "...", "physical_step": "...", "review_status": "draft", "origin": "kept AI01"}
-{"id": "t125", "question": "Why is the sky blue?", "context": "", "outdoor_goal_fit": false, "route": null, "guard": "scope_nudge", "reason": "...", "physical_step": null, "review_status": "draft", "origin": "new: guard"}
-```
-
-- `route` is set for outings; `guard` (`scope_nudge`, `context_request`, `split_request`) is set when there is no route, labelled from the guide's reference decisions.
-- `review_status` becomes `agreed` only after the reviewer checks the row. Only `agreed` rows are converted into `train.jsonl` for training.
-- `physical_step` is for review and later card work; the router is not trained on it.
+| `train.jsonl` | Training examples, converted from the team's training dataset | Training data author |
+| `test_sealed.jsonl` | Sealed evaluation set (30–50 rows). Training code must never open it, and prompts must not be tuned on it. | A **different** teammate, kept separate from the training data |
+| `train_annotations.jsonl` | Earlier draft in the old format. **Not used**; removed when the team's dataset arrives. | — |
 
 ## Row format
 
-One JSON object per line ([JSONL](https://jsonlines.org/)), defined by `LabelledExample` in `contract/src/offscript_contract/dataset.py`:
+One JSON object per line ([JSONL](https://jsonlines.org/)), defined by `LabelledExample` in `contract/src/offscript_contract/dataset.py`. Each row has the question, the route, a reason, and **only that route's fields**:
 
 ```json
-{"id": "t001", "question": "What do regulars buy at this stall?", "context": "at the outdoor market", "fit": "ok", "route": "HUMAN", "reason": "Regulars know what is good here; no page captures it."}
-{"id": "t002", "question": "What is photosynthesis?", "context": "", "fit": "scope_nudge", "route": null, "reason": "This is fully answered on a screen and needs no outing."}
+{"id": "t001", "question": "Why does bread go stale?", "context": "", "route": "AI", "reason": "How bread ages is stable kitchen science.", "answer": "Its starch slowly recrystallises and pushes water out, so the crumb turns firm and dry."}
+{"id": "t002", "question": "Is the planetarium open on Monday?", "context": "Bengaluru", "route": "SEARCH", "reason": "Opening days change, so a current listing is needed.", "search_query": "Bengaluru planetarium opening hours Monday"}
+{"id": "t003", "question": "Where do people usually cast from on this pier?", "context": "on the pier now", "route": "HUMAN", "reason": "Regular anglers here know the spots that work.", "who_to_ask": "a regular angler on the pier", "suggested_question": "Where do you usually like to cast from here?"}
 ```
 
 | Field | Rule |
 |---|---|
-| `id` | Unique in the file; letters, digits, `-` and `_` only (e.g. `t001` for train, `s001` for sealed) |
+| `id` | Unique in the file; letters, digits, `-` and `_` only |
 | `question` | 1–300 characters, one line, no leading/trailing or double spaces |
-| `context` | `""` when there is none (never `"none"`), otherwise up to 200 characters, same cleanliness rules |
-| `fit` | `ok`, `scope_nudge`, `context_request` or `split_request` |
-| `route` | `AI`, `SEARCH` or `HUMAN` when `fit` is `ok`; `null` otherwise |
-| `reason` | One plain sentence, at most 160 characters, written for the person asking |
+| `context` | `""` when there is none (never `"none"`), otherwise up to 200 characters, same rules |
+| `route` | `AI`, `SEARCH` or `HUMAN` |
+| `reason` | One plain sentence, at most 160 characters |
+| `answer` (AI only) | About 50 words, at most 70; plain sentences or short bullet lines |
+| `search_query` (SEARCH only) | One line, at most 200 characters |
+| `who_to_ask` (HUMAN only) | One type of person, never a named or "present" individual; at most 80 characters |
+| `suggested_question` (HUMAN only) | One natural question ending in "?", about 25 words, at most 30 |
 
-Safety and refusal questions (medical, legal, emergencies, dangerous routes, targeting people) are **not** labelled here: backend rules catch them before the model.
+Safety and refusal questions are **not** included: backend rules catch them before the model. Questions the guard check would stop (missing essential detail, two questions in one) are not router training rows either.
 
 ## Check a file before committing
 
@@ -44,10 +36,10 @@ Safety and refusal questions (medical, legal, emergencies, dangerous routes, tar
 uv run python -m offscript_contract.dataset training/data/train.jsonl
 ```
 
-It prints the valid row count per category and every problem with its line number, and exits non-zero if anything is wrong.
+It prints the valid row count per route and every problem with its line number, and exits non-zero if anything is wrong.
 
 ## Rules
 
 - No question may appear in both files, even reworded. A check enforces this before training.
-- The reference cases R01–R24 in AGENTS.md are design examples, not data for either file.
+- The reference cases in AGENTS.md (A7) and the worked examples in the team's spec documents are design examples, not data for either file.
 - Every row is reviewed by a person, even if an LLM drafted it.

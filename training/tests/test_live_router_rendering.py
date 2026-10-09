@@ -13,10 +13,9 @@ from offscript_contract.router import (
     BASE_MODEL,
     QUESTION_MAX,
     RENDERER_NAME,
-    Fit,
-    Route,
-    RouterOutput,
     build_router_messages,
+    parse_router_output,
+    to_target_json,
 )
 
 pytestmark = pytest.mark.live
@@ -58,7 +57,12 @@ def test_inference_prompt_is_the_training_prefix(cookbook):
 
     tokenizer, renderer = cookbook
     messages = build_router_messages("What do regulars buy at this stall?", "at the market")
-    target = RouterOutput(fit=Fit.OK, route=Route.HUMAN, reason="Regulars know.").to_target_json()
+    target = to_target_json(
+        parse_router_output(
+            '{"route":"HUMAN","reason":"Regulars know.","who_to_ask":"a regular",'
+            '"suggested_question":"What do you usually get here?"}'
+        )
+    )
     datum = conversation_to_datum(
         [*messages, {"role": "assistant", "content": target}],
         renderer,
@@ -78,7 +82,7 @@ def test_stop_token_and_decoding_match_cookbook(cookbook):
     stop = stop_token_id(tokenizer)
     assert stop == tokenizer.convert_tokens_to_ids("<|im_end|>")
     assert renderer.get_stop_sequences() == [stop]
-    reply = '{"fit":"ok","route":"AI","reason":"Stable know-how, café 🙂."}'
+    reply = '{"route":"AI","reason":"Stable know-how.","answer":"- Wipe it\\n- Oil it, café 🙂"}'
     tokens = tokenizer.encode(reply, add_special_tokens=False) + [stop]
     message, _ = renderer.parse_response(tokens)
     assert decode_completion(tokenizer, tokens) == (get_text_content(message), True)

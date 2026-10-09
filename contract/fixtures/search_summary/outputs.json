@@ -1,0 +1,22 @@
+{
+  "description": "Sample search results and raw summary replies for the backend mock and tests.",
+  "results": [
+    {"title": "City Museum visitor information", "snippet": "Open Tuesday to Sunday, 10:00 AM to 6:00 PM. Closed on Mondays. Adult ticket 50.", "link": "https://www.citymuseum.example/visit"},
+    {"title": "City Museum review", "snippet": "Great galleries, busy on weekends.", "link": "https://travel.example/city-museum"}
+  ],
+  "valid": [
+    {"name": "answered_with_tip", "grounded": true, "text": "{\"status\":\"answered\",\"summary\":\"The museum is open Tuesday to Sunday, 10:00 AM to 6:00 PM, and closed on Mondays.\",\"source\":1,\"local_tip\":\"Regular visitors can tell you which galleries are least crowded.\"}"},
+    {"name": "answered_no_tip", "grounded": true, "text": "{\"status\":\"answered\",\"summary\":\"An adult ticket costs 50.\",\"source\":1,\"local_tip\":null}"},
+    {"name": "unclear", "grounded": true, "text": "{\"status\":\"unclear\",\"summary\":null,\"source\":null,\"local_tip\":null}"},
+    {"name": "invented_time", "grounded": false, "text": "{\"status\":\"answered\",\"summary\":\"The museum is open until 8:00 PM on Fridays.\",\"source\":1,\"local_tip\":null}"},
+    {"name": "missing_source", "grounded": false, "text": "{\"status\":\"answered\",\"summary\":\"Open from 10:00 AM.\",\"source\":5,\"local_tip\":null}"}
+  ],
+  "invalid": [
+    {"name": "empty", "code": "empty", "text": ""},
+    {"name": "answered_without_source", "code": "schema", "text": "{\"status\":\"answered\",\"summary\":\"Open daily.\",\"source\":null,\"local_tip\":null}"},
+    {"name": "unclear_with_summary", "code": "schema", "text": "{\"status\":\"unclear\",\"summary\":\"Maybe open.\",\"source\":null,\"local_tip\":null}"},
+    {"name": "source_out_of_range", "code": "schema", "text": "{\"status\":\"answered\",\"summary\":\"Open daily.\",\"source\":9,\"local_tip\":null}"},
+    {"name": "missing_tip_field", "code": "schema", "text": "{\"status\":\"unclear\",\"summary\":null,\"source\":null}"},
+    {"name": "prose", "code": "not_json", "text": "The museum is open."}
+  ]
+}
