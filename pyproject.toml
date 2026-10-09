@@ -1,0 +1,39 @@
+[project]
+name = "offscript"
+version = "0.1.0"
+description = "Offscript monorepo (uv workspace root). Not a package itself."
+requires-python = ">=3.11"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["contract", "api", "training"]
+
+[tool.uv.sources]
+offscript-contract = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "pytest>=8",
+    "pre-commit>=4",
+    "httpx2>=2.13.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "S"]
+ignore = ["S101"] # assert is fine in tests
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S105", "S106"] # fake credentials in tests
+
+[tool.ruff.lint.isort]
+known-first-party = ["offscript_api", "offscript_contract", "offscript_training"]
+
+[tool.pytest.ini_options]
+addopts = "-q --import-mode=importlib"

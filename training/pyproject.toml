@@ -1,0 +1,14 @@
+[project]
+name = "offscript-training"
+version = "0.1.0"
+description = "Offscript datasets, Tinker LoRA fine-tuning and evaluation (offline only)."
+requires-python = ">=3.11"
+# Add the Tinker SDK when the training task starts. Never import offscript_api.
+dependencies = ["offscript-contract"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/offscript_training"]
