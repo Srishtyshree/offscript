@@ -1,0 +1,15 @@
+# gitleaks config: the default rules plus keys this project uses that gitleaks doesn't know.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "tinker-api-key"
+description = "Tinker API key"
+regex = '''tml-[A-Za-z0-9]{32,}'''
+keywords = ["tml-"]
+
+[[rules]]
+id = "serpapi-api-key"
+description = "SerpApi API key"
+regex = '''(?i)serp_?api[a-z_]*\s*[:=]\s*["']?([a-f0-9]{64})'''
+keywords = ["serpapi", "serp_api"]
