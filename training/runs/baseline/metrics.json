@@ -1,0 +1,93 @@
+{
+  "model": "Qwen/Qwen3.5-9B",
+  "data": "training/data/test_sealed.jsonl",
+  "router_prompt_version": "e018ffbee7cc",
+  "sampling": {
+    "temperature": 0.0,
+    "max_tokens": 350
+  },
+  "evaluated_at": "2026-10-09T18:27:39+00:00",
+  "all": {
+    "questions": 32,
+    "accuracy": 0.938,
+    "correct": 30,
+    "confusion": {
+      "AI": {
+        "AI": 10,
+        "SEARCH": 1
+      },
+      "SEARCH": {
+        "SEARCH": 10,
+        "AI": 1
+      },
+      "HUMAN": {
+        "HUMAN": 10
+      }
+    },
+    "human_precision": 1.0,
+    "human_recall": 1.0,
+    "inappropriate_human_referrals": 0,
+    "inappropriate_human_ids": [],
+    "invalid_outputs": 0,
+    "invalid_rate": 0.0,
+    "invalid_codes": {}
+  },
+  "by_kind": {
+    "general": {
+      "questions": 2,
+      "accuracy": 1.0,
+      "correct": 2,
+      "confusion": {
+        "AI": {
+          "AI": 1
+        },
+        "SEARCH": {
+          "SEARCH": 1
+        },
+        "HUMAN": {}
+      },
+      "human_precision": null,
+      "human_recall": null,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    },
+    "outdoor": {
+      "questions": 30,
+      "accuracy": 0.933,
+      "correct": 28,
+      "confusion": {
+        "AI": {
+          "AI": 9,
+          "SEARCH": 1
+        },
+        "SEARCH": {
+          "SEARCH": 9,
+          "AI": 1
+        },
+        "HUMAN": {
+          "HUMAN": 10
+        }
+      },
+      "human_precision": 1.0,
+      "human_recall": 1.0,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    }
+  },
+  "content": {
+    "valid_replies": 32,
+    "ai_answer_words_avg": 51.4,
+    "ai_answers_within_target": 0.545,
+    "human_questions_within_target": 1.0,
+    "content_rule_problems": {
+      "answer over 60 words": 1,
+      "implies someone is present": 4
+    }
+  }
+}

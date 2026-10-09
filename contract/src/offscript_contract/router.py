@@ -197,6 +197,11 @@ def router_prompt_version() -> str:
     return prompt_version("router_system")
 
 
+# Frozen before the baseline run: the baseline, the training data and the tuned checkpoint all
+# use this exact prompt. Changing it means re-running the baseline and the fine-tuning.
+FROZEN_ROUTER_PROMPT_VERSION = "e018ffbee7cc"
+
+
 def build_router_messages(question: str, context: str | None = None) -> list[dict[str, str]]:
     router_input = normalize_input(question, context)
     return [
