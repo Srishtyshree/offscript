@@ -1,0 +1,44 @@
+# Secrets: commit only .env.example
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# Node
+node_modules/
+web/dist/
+*.tsbuildinfo
+web/test-results/
+web/playwright-report/
+
+# Training: commit configs, logs, metrics and checkpoint IDs, never weights or caches
+training/runs/**/checkpoints/
+training/**/*.safetensors
+training/**/*.bin
+training/.cache/
+
+# Generated (re-created by scripts)
+contract/schema/*.json
+web/src/contract/generated/
+
+# Personal tool settings
+CLAUDE.local.md
+.claude/settings.local.json
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
