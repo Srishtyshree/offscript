@@ -36,4 +36,5 @@ ignore = ["S101"] # assert is fine in tests
 known-first-party = ["offscript_api", "offscript_contract", "offscript_training"]
 
 [tool.pytest.ini_options]
-addopts = "-q --import-mode=importlib"
+addopts = "-q --import-mode=importlib -m 'not live'"
+markers = ["live: needs network (tokenizer download or Tinker); run with `make test-live`"]

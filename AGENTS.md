@@ -155,7 +155,7 @@ scripts/    Repo utilities: schema export, type generation (create when first ne
 - Python is a **uv workspace** (root `pyproject.toml`) with three members: `contract`, `api` and `training`.
 - `web/` and `api/` share nothing except through `contract/`.
 - `training/` never imports `api/`, and `api/` never reads training data.
-- The router system prompt lives in `contract/prompts/`, and training and inference must use it verbatim.
+- The router system prompt lives in `contract/src/offscript_contract/prompts/router_system.md`, and training and inference must use it verbatim.
 - Each folder has a README describing its sub-structure. Put new code in the planned subfolder.
 
 ## B2. Stack
@@ -164,7 +164,7 @@ scripts/    Repo utilities: schema export, type generation (create when first ne
 |---|---|
 | Frontend | Node 20.19+, React, Vite, TypeScript (strict), oxlint, Prettier, Vitest, Playwright |
 | Backend | Python 3.11+ (3.12 pinned), uv, FastAPI, Pydantic v2, pydantic-settings, async httpx, pytest, ruff |
-| Model | Tinker SDK: LoRA SFT on a small Qwen instruct model (confirm the exact name in Tinker); inference samples the saved checkpoint |
+| Model | Tinker SDK: LoRA SFT on `Qwen/Qwen3-8B` with the `qwen3_disable_thinking` renderer; inference samples the saved checkpoint. The backend uses `tinker` only (no `tinker-cookbook`, no PyTorch). |
 | Search | SerpApi, backend only |
 | Hosting | Render |
 
@@ -175,16 +175,17 @@ Use current stable versions. Add a dependency only when the task needs it, and j
 Each step is its own module with its own tests.
 
 1. **Validate.**
-   - `question`: required, trimmed, 1–300 characters.
+   - Use `normalize_input` from `contract/` (limits apply after cleanup).
+   - `question`: required, 1–300 characters.
    - `context`: optional, at most 200 characters.
    - Failure → 422.
 2. **Safety rules.** Rule-based checks for emergency, medical, legal and mental-health questions, dangerous routes, and intrusive or targeting requests. This is the **only** place rules are allowed. A hit returns a guard response, and the model is not called.
 3. **Router.**
-   - Sample the tuned checkpoint with a fixed system prompt, `temperature=0`, and JSON-only output.
-   - Validate the output with Pydantic.
-   - If the output is invalid, retry once, then return an `invalid_model_output` error.
+   - Follow `docs/router-integration.md`: build the prompt with the contract's `build_router_messages` and `render_chat_prompt`, sample the tuned checkpoint at `temperature=0`, and parse with `parse_router_output`.
+   - Network error or timeout: retry once if the time budget allows.
+   - Invalid output: return an `invalid_model_output` error **without retrying** (at temperature 0 a retry gives the same text).
    - **Never** fall back to rules or a default route.
-4. **Fit / guard.** The router output carries a **fit** field that is separate from **route** (scope nudge, context request, split request). If the request doesn't fit, return the guard response.
+4. **Fit / guard.** The router output is `{fit, route, reason}`. `fit` is `ok`, `scope_nudge`, `context_request` or `split_request`; `route` is set only when `fit` is `ok`. If the request doesn't fit, return the guard response.
 5. **Handler.**
    - `AI`: a concise answer. No live facts.
    - `SEARCH`:
@@ -232,7 +233,8 @@ Each step is its own module with its own tests.
 
 ## B6. Tinker and training
 
-- **Env vars:** `TINKER_API_KEY` and the saved checkpoint path. Verify the exact names against the Tinker SDK. Load them through pydantic-settings and fail fast in production if they're missing.
+- **Env vars:** `TINKER_API_KEY` and `TINKER_MODEL_PATH` (a `tinker://…/sampler_weights/…` path). Load them through pydantic-settings and fail fast in production if they're missing.
+- **Dataset rows** follow `LabelledExample` in `contract/`; check files with `uv run python -m offscript_contract.dataset <file>`. See `training/data/README.md`.
 - **Data:**
   - JSONL in `training/data/`, matching the router output schema.
   - Each row has **two separate labels**: outing fit and route. Route is null when the request doesn't fit.
@@ -302,13 +304,17 @@ Do not build any of these:
 - agent chains
 - a native app
 
-## B12. Open decisions
+## B12. Decisions and open questions
 
-Ask before assuming an answer to any of these.
+**Decided:**
+- The tuned model only routes: it returns `{fit, route, reason}` (schema in `contract/`).
+- Card text (AI answer, SEARCH summary, HUMAN question, "only out there", "do this") comes from the **base** `Qwen/Qwen3-8B` with separate prompts.
+- The model learns `scope_nudge`, `context_request` and `split_request`. `safety_guidance` and `refusal` are backend rules that run before the model; `search_limitation` comes from the search step.
+- Model `Qwen/Qwen3-8B`, renderer `qwen3_disable_thinking`, env vars `TINKER_API_KEY` and `TINKER_MODEL_PATH`.
 
-- **Who generates the card text:** the AI answer, SEARCH summary, HUMAN question, "only out there" and "do this". Is it the tuned checkpoint, the base Qwen, or a separate prompt?
-- **Exact router output schema** and the card, guard and error shapes in `contract/`.
-- **Exact Tinker model name** and env var names.
+**Still open** (ask before assuming):
+- The card, guard and error response shapes for `POST /api/route` in `contract/` (backend-led).
+- The router system prompt is a v0 draft until it's aligned with the labelling guide and frozen before the baseline run.
 
 ## B13. Commands
 
@@ -320,7 +326,9 @@ Run from the repo root. Requires uv, Node 20.19+ and make.
 | `make dev` | API on :8000 and web on :5173 |
 | `make dev-api` / `make dev-web` | Run one side |
 | `make health` | `curl` the running API's `/health` |
-| `make test` | pytest (api, contract, training) and Vitest |
+| `make test` | pytest (api, contract, training) and Vitest; no network |
+| `make test-live` | Network tests: prompt/tokenizer parity with Tinker (needs `training/.env`) |
+| `make smoke-test` | Live Tinker check: sample, tiny train, save (costs cents) |
 | `make lint` | ruff check and format, oxlint, Prettier, `tsc` |
 | `make format` | Auto-format Python and web |
 

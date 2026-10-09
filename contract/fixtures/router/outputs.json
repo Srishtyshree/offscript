@@ -1,0 +1,37 @@
+{
+  "description": "Raw router replies for the backend mock and tests. Every 'valid' text parses with parse_router_output; every 'invalid' text fails with the given code.",
+  "valid": [
+    {"name": "ok_ai", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Joining etiquette is stable know-how you can learn before you go.\"}"},
+    {"name": "ok_search", "text": "{\"fit\":\"ok\",\"route\":\"SEARCH\",\"reason\":\"Today's opening hours need a current public source.\"}"},
+    {"name": "ok_human", "text": "{\"fit\":\"ok\",\"route\":\"HUMAN\",\"reason\":\"Regulars know what is good here; no page captures it.\"}"},
+    {"name": "scope_nudge", "text": "{\"fit\":\"scope_nudge\",\"route\":null,\"reason\":\"This is fully answered on a screen and needs no outing.\"}"},
+    {"name": "context_request", "text": "{\"fit\":\"context_request\",\"route\":null,\"reason\":\"Which places are open depends on your area.\"}"},
+    {"name": "split_request", "text": "{\"fit\":\"split_request\",\"route\":null,\"reason\":\"Learning the game and finding one tonight need different sources.\"}"},
+    {"name": "spaced_json", "text": "  {\"fit\": \"ok\", \"route\": \"HUMAN\", \"reason\": \"Members know what the club is really like.\"}\n"},
+    {"name": "unicode_reason", "text": "{\"fit\":\"ok\",\"route\":\"SEARCH\",\"reason\":\"The café's hours change, so check a live listing.\"}"}
+  ],
+  "invalid": [
+    {"name": "empty", "code": "empty", "text": ""},
+    {"name": "prose", "code": "not_json", "text": "The best route here is HUMAN."},
+    {"name": "prose_before_json", "code": "extra_text", "text": "Sure! {\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Stable know-how.\"}"},
+    {"name": "code_fence", "code": "extra_text", "text": "```json\n{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Stable know-how.\"}\n```"},
+    {"name": "thinking_block", "code": "extra_text", "text": "<think>It is a public fact.</think>{\"fit\":\"ok\",\"route\":\"SEARCH\",\"reason\":\"Hours change.\"}"},
+    {"name": "text_after_json", "code": "extra_text", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Stable know-how.\"} Hope this helps!"},
+    {"name": "two_objects", "code": "extra_text", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"A.\"}{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"B.\"}"},
+    {"name": "trailing_comma", "code": "not_json", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Stable know-how.\",}"},
+    {"name": "cut_off", "code": "truncated", "text": "{\"fit\":\"ok\",\"route\":\"HUMAN\",\"reason\":\"Regulars kn"},
+    {"name": "duplicate_keys", "code": "duplicate_keys", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"route\":\"HUMAN\",\"reason\":\"Twice.\"}"},
+    {"name": "array", "code": "not_json", "text": "[\"ok\", \"AI\"]"},
+    {"name": "missing_reason", "code": "schema", "text": "{\"fit\":\"ok\",\"route\":\"AI\"}"},
+    {"name": "missing_route", "code": "schema", "text": "{\"fit\":\"scope_nudge\",\"reason\":\"Screen-complete.\"}"},
+    {"name": "extra_field", "code": "schema", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Stable know-how.\",\"confidence\":0.9}"},
+    {"name": "lowercase_route", "code": "schema", "text": "{\"fit\":\"ok\",\"route\":\"human\",\"reason\":\"Regulars know.\"}"},
+    {"name": "unknown_fit", "code": "schema", "text": "{\"fit\":\"safety_guidance\",\"route\":null,\"reason\":\"Unsafe.\"}"},
+    {"name": "null_as_string", "code": "schema", "text": "{\"fit\":\"scope_nudge\",\"route\":\"null\",\"reason\":\"Screen-complete.\"}"},
+    {"name": "number_reason", "code": "schema", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":42}"},
+    {"name": "empty_reason", "code": "schema", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"\"}"},
+    {"name": "multiline_reason", "code": "schema", "text": "{\"fit\":\"ok\",\"route\":\"AI\",\"reason\":\"Line one.\\nLine two.\"}"},
+    {"name": "ok_without_route", "code": "inconsistent", "text": "{\"fit\":\"ok\",\"route\":null,\"reason\":\"No route given.\"}"},
+    {"name": "guard_with_route", "code": "inconsistent", "text": "{\"fit\":\"context_request\",\"route\":\"SEARCH\",\"reason\":\"Needs an area.\"}"}
+  ]
+}
