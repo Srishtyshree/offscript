@@ -41,7 +41,7 @@ def cookbook():
     from tinker_cookbook.tokenizer_utils import get_tokenizer
 
     tokenizer = get_tokenizer(BASE_MODEL)
-    return tokenizer, renderers.get_renderer(RENDERER_NAME, tokenizer)
+    return tokenizer, renderers.get_renderer(RENDERER_NAME, tokenizer, model_name=BASE_MODEL)
 
 
 @pytest.mark.parametrize(("question", "context"), CASES)
@@ -75,10 +75,11 @@ def test_stop_token_and_decoding_match_cookbook(cookbook):
     from tinker_cookbook.renderers import get_text_content
 
     tokenizer, renderer = cookbook
-    assert stop_token_id(tokenizer) == 151645
-    assert renderer.get_stop_sequences() == [151645]
+    stop = stop_token_id(tokenizer)
+    assert stop == tokenizer.convert_tokens_to_ids("<|im_end|>")
+    assert renderer.get_stop_sequences() == [stop]
     reply = '{"fit":"ok","route":"AI","reason":"Stable know-how, café 🙂."}'
-    tokens = tokenizer.encode(reply, add_special_tokens=False) + [151645]
+    tokens = tokenizer.encode(reply, add_special_tokens=False) + [stop]
     message, _ = renderer.parse_response(tokens)
     assert decode_completion(tokenizer, tokens) == (get_text_content(message), True)
 
@@ -92,3 +93,13 @@ def test_tinker_served_tokenizer_matches_training_tokenizer(cookbook):
     for question, context in CASES:
         for message in build_router_messages(question, context):
             assert render_chat_prompt(served, [message]) == render_chat_prompt(tokenizer, [message])
+
+
+def test_every_special_token_string_is_removed_from_user_input(cookbook):
+    from offscript_contract.router import clean_text
+
+    tokenizer, _ = cookbook
+    specials = [token for token in tokenizer.get_added_vocab() if token.startswith("<")]
+    assert specials, "expected special tokens in the vocabulary"
+    leftover = [token for token in specials if token in clean_text(f"a {token} b")]
+    assert leftover == []

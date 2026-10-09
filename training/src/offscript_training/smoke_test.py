@@ -16,8 +16,9 @@ from tinker_cookbook.renderers import TrainOnWhat, get_text_content
 from tinker_cookbook.supervised.common import compute_mean_nll
 from tinker_cookbook.supervised.data import conversation_to_datum
 
-BASE_MODEL = "Qwen/Qwen3-8B"
-RENDERER = "qwen3_disable_thinking"
+from offscript_contract.router import BASE_MODEL
+from offscript_contract.router import RENDERER_NAME as RENDERER
+
 LORA_RANK = 16
 STEPS = 5
 LEARNING_RATE = 2e-4
@@ -89,7 +90,7 @@ async def run() -> int:
 
     print(f"[1/4] Creating LoRA training client on {BASE_MODEL} (rank {LORA_RANK})")
     trainer = await service.create_lora_training_client_async(base_model=BASE_MODEL, rank=LORA_RANK)
-    renderer = renderers.get_renderer(RENDERER, trainer.get_tokenizer())
+    renderer = renderers.get_renderer(RENDERER, trainer.get_tokenizer(), model_name=BASE_MODEL)
 
     print("[2/4] Sampling the base model")
     base = await service.create_sampling_client_async(base_model=BASE_MODEL)
