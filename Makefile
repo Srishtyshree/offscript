@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev dev-api dev-web health smoke-test test test-live test-py test-web lint format
+.PHONY: help install dev dev-api dev-web health smoke-test check-data baseline train evaluate report test test-live test-py test-web lint format
 
 API_PORT ?= 8000
 
@@ -25,6 +25,24 @@ health: ## Check the running API's /health
 
 smoke-test: ## Live Tinker check: sample, tiny train, save (needs training/.env, costs cents)
 	uv run --env-file training/.env python -m offscript_training.smoke_test
+
+RUN ?= sft-v1
+TRAIN_ENV = uv run --env-file training/.env python -m offscript_training
+
+check-data: ## Validate train + sealed files and check they don't overlap
+	uv run python -m offscript_training.data
+
+baseline: ## Untuned model on the sealed set → training/runs/baseline (costs cents)
+	$(TRAIN_ENV).evaluate --base --out training/runs/baseline
+
+train: ## LoRA fine-tune → training/runs/$(RUN) (costs about $$1)
+	$(TRAIN_ENV).train --name $(RUN)
+
+evaluate: ## Tuned model on the sealed set (MODEL_PATH=tinker://...) → training/runs/$(RUN)/eval
+	$(TRAIN_ENV).evaluate --model-path $(MODEL_PATH) --out training/runs/$(RUN)/eval
+
+report: ## Base vs tuned comparison → training/runs/REPORT.md
+	uv run python -m offscript_training.report training/runs/baseline training/runs/$(RUN)/eval > training/runs/REPORT.md
 
 test: test-py test-web ## Run all tests
 

@@ -1,0 +1,16 @@
+{
+  "base_model": "Qwen/Qwen3.5-9B",
+  "renderer": "qwen3_5_disable_thinking",
+  "router_prompt_version": "e018ffbee7cc",
+  "train_file": "training/data/train.jsonl",
+  "train_rows": 120,
+  "max_steps": null,
+  "lora_rank": 32,
+  "learning_rate": 0.000473,
+  "lr_schedule": "linear",
+  "num_epochs": 4,
+  "batch_size": 16,
+  "validation_rows": 15,
+  "max_length": 2048,
+  "seed": 0
+}

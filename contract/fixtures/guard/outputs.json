@@ -1,0 +1,16 @@
+{
+  "description": "Raw guard-check replies for the backend mock and tests.",
+  "valid": [
+    {"name": "ok", "text": "{\"verdict\":\"ok\",\"message\":null}"},
+    {"name": "needs_detail", "text": "{\"verdict\":\"needs_detail\",\"message\":\"Which area will you be in?\"}"},
+    {"name": "two_questions", "text": "{\"verdict\":\"two_questions\",\"message\":\"Would you like serving tips or a free court first?\"}"}
+  ],
+  "invalid": [
+    {"name": "empty", "code": "empty", "text": ""},
+    {"name": "prose", "code": "not_json", "text": "This question is fine."},
+    {"name": "ok_with_message", "code": "schema", "text": "{\"verdict\":\"ok\",\"message\":\"Looks fine.\"}"},
+    {"name": "stop_without_message", "code": "schema", "text": "{\"verdict\":\"needs_detail\",\"message\":null}"},
+    {"name": "unknown_verdict", "code": "schema", "text": "{\"verdict\":\"unsafe\",\"message\":\"No.\"}"},
+    {"name": "cut_off", "code": "truncated", "text": "{\"verdict\":\"needs_detail\",\"message\":\"Which ar"}
+  ]
+}

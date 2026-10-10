@@ -1,0 +1,52 @@
+{
+  "final_sampler_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/final",
+  "checkpoints": [
+    {
+      "name": "000006",
+      "batch": 0,
+      "epoch": 1,
+      "state_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/weights/000006",
+      "sampler_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000006",
+      "elapsed_tokens": 125214
+    },
+    {
+      "name": "000012",
+      "batch": 0,
+      "epoch": 2,
+      "state_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/weights/000012",
+      "sampler_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012",
+      "elapsed_tokens": 232521
+    },
+    {
+      "name": "000018",
+      "batch": 0,
+      "epoch": 3,
+      "state_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/weights/000018",
+      "sampler_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000018",
+      "elapsed_tokens": 340009
+    },
+    {
+      "name": "final",
+      "batch": 0,
+      "epoch": 4,
+      "state_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/weights/final",
+      "sampler_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/final",
+      "elapsed_tokens": 429303
+    }
+  ],
+  "last_metrics": {
+    "step": 23,
+    "epoch": 3,
+    "progress": 1.0,
+    "learning_rate": 1.9708333333333315e-05,
+    "num_sequences": 16,
+    "num_tokens": 17865,
+    "num_loss_tokens": 16.00000013038516,
+    "train_mean_nll": 0.15676914155483246,
+    "train_mean_bpb": 0.045491095726338276,
+    "time/get_batch": 0.06304600001021754,
+    "time/submit_batch": 0.06359224999323487,
+    "time/step": 1.7853570419974858,
+    "time/finish_batch": 1.7976763749902602
+  }
+}

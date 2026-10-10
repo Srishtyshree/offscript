@@ -1,9 +1,9 @@
-"""Qwen3 chat prompt rendering without tinker-cookbook (and therefore without PyTorch).
+"""Qwen3.5 chat prompt rendering without tinker-cookbook (and therefore without PyTorch).
 
-Mirrors the cookbook's `qwen3_disable_thinking` renderer token for token: headers and the
-generation suffix are encoded as fixed text, message content with `split_special_tokens=True`
-so a user typing "<|im_end|>" gets plain text, not a control token. A live test checks parity
-with the cookbook renderer.
+Mirrors the cookbook's `qwen3_5_disable_thinking` renderer token for token: message content is
+stripped of leading/trailing whitespace (as Qwen3.5's template does), headers and the generation
+suffix are encoded as fixed text, and content with `split_special_tokens=True` so a user typing
+"<|im_end|>" gets plain text, not a control token. A live test checks parity with the cookbook.
 """
 
 from typing import Protocol
@@ -30,7 +30,8 @@ def stop_token_id(tokenizer: Tokenizer) -> int:
 def render_chat_text(messages: list[dict[str, str]]) -> str:
     """The prompt as text, for snapshots and debugging. Not safe to tokenize directly."""
     parts = [
-        f"{chr(10) if index else ''}<|im_start|>{message['role']}\n{message['content']}{STOP_TOKEN}"
+        f"{chr(10) if index else ''}<|im_start|>{message['role']}\n{message['content'].strip()}"
+        f"{STOP_TOKEN}"
         for index, message in enumerate(messages)
     ]
     return "".join(parts) + "\n" + GENERATION_SUFFIX
@@ -43,7 +44,7 @@ def render_chat_prompt(tokenizer: Tokenizer, messages: list[dict[str, str]]) -> 
     end = stop_token_id(tokenizer)
     tokens: list[int] = []
     for index, message in enumerate(messages):
-        role, content = message["role"], message["content"]
+        role, content = message["role"], message["content"].strip()
         if role not in ALLOWED_ROLES:
             raise ValueError(f"role must be one of {ALLOWED_ROLES}, got {role!r}")
         header = f"{chr(10) if index else ''}<|im_start|>{role}\n"

@@ -1,0 +1,11 @@
+{
+  "chosen_checkpoint": "000012",
+  "sampler_path": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012",
+  "rule": "lowest validation loss among saved checkpoints (step 12: 0.756); chosen before any sealed-set evaluation",
+  "validation_nll": {
+    "000006": 0.759,
+    "000012": 0.756,
+    "000018": 0.765,
+    "final": 0.802
+  }
+}

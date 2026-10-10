@@ -8,9 +8,20 @@ GOOD = {
     "id": "t001",
     "question": "What do regulars buy at this stall?",
     "context": "at the outdoor market",
-    "fit": "ok",
     "route": "HUMAN",
     "reason": "Regulars know what is good here.",
+    "who_to_ask": "a regular customer",
+    "suggested_question": "What do you usually get here?",
+    "outdoor_action": "At the market, ask a willing regular, then try what they suggest.",
+}
+AI_ROW = {
+    "id": "t002",
+    "question": "Why does bread go stale?",
+    "context": "",
+    "route": "AI",
+    "reason": "Stable kitchen science.",
+    "answer": "Its starch recrystallises and pushes water out.",
+    "outdoor_action": "Visit a bakery early and compare a fresh loaf with a day-old one.",
 }
 
 
@@ -22,16 +33,16 @@ def write_rows(tmp_path, rows):
     return path
 
 
-def test_valid_row_and_helpers():
+def test_valid_rows_and_helpers():
     example = LabelledExample.model_validate(GOOD)
     assert example.category == "HUMAN"
     assert example.router_input.context == "at the outdoor market"
-    assert example.label.to_target_json().startswith('{"fit":"ok","route":"HUMAN"')
-
-
-def test_empty_context_is_allowed():
-    row = {**GOOD, "context": "", "fit": "scope_nudge", "route": None}
-    assert LabelledExample.model_validate(row).category == "scope_nudge"
+    assert example.target_json == (
+        '{"route":"HUMAN","reason":"Regulars know what is good here.",'
+        '"who_to_ask":"a regular customer","suggested_question":"What do you usually get here?",'
+        '"outdoor_action":"At the market, ask a willing regular, then try what they suggest."}'
+    )
+    assert LabelledExample.model_validate(AI_ROW).target_json.startswith('{"route":"AI"')
 
 
 @pytest.mark.parametrize(
@@ -42,13 +53,16 @@ def test_empty_context_is_allowed():
         {"question": "two\nlines?"},
         {"context": "none"},
         {"context": "at the  market"},
-        {"route": None},
-        {"fit": "scope_nudge"},
+        {"route": "AI"},
         {"route": "human"},
         {"reason": ""},
         {"question": ""},
         {"question": "x" * 301},
+        {"answer": "Extra field for HUMAN."},
+        {"suggested_question": "Not a question."},
         {"extra": "field"},
+        {"fit": "ok"},
+        {"outdoor_action": ""},
     ],
 )
 def test_bad_rows_are_rejected(change):
@@ -61,12 +75,12 @@ def test_report_lists_every_problem_with_line_numbers(tmp_path):
         tmp_path,
         [
             GOOD,
-            {**GOOD, "id": "t002", "route": None},
+            {**GOOD, "id": "t002", "suggested_question": None},
             "not json\n",
             "\n",
             {**GOOD, "id": "t001", "question": "Another question here?"},
             {**GOOD, "id": "t003", "question": "what do regulars buy at this stall?"},
-            {**GOOD, "id": "t004", "question": "Is the pool open today?", "route": "SEARCH"},
+            {**AI_ROW, "id": "t004"},
         ],
     )
     report = validate_dataset(path)
@@ -77,13 +91,34 @@ def test_report_lists_every_problem_with_line_numbers(tmp_path):
     assert "line 4: blank line" in joined
     assert "line 5: id 't001' repeats line 1" in joined
     assert "line 6: question repeats line 1" in joined
-    assert report.counts == {"HUMAN": 3, "SEARCH": 1}
+    assert report.counts == {"HUMAN": 3, "AI": 1}
 
 
 def test_cli_exit_codes(tmp_path, capsys):
-    good = write_rows(tmp_path, [GOOD])
-    assert main([str(good)]) == 0
+    assert main([str(write_rows(tmp_path, [GOOD]))]) == 0
     bad = tmp_path / "bad.jsonl"
     bad.write_text("not json\n")
     assert main([str(bad)]) == 1
     assert "not valid JSON" in capsys.readouterr().out
+
+
+SEALED = {
+    "id": "s001",
+    "question": "Is the stepwell open?",
+    "context": "Adalaj",
+    "route": "SEARCH",
+    "kind": "outdoor",
+}
+
+
+def test_sealed_rows_hold_question_and_route_only(tmp_path):
+    from offscript_contract.dataset import SealedExample
+
+    assert SealedExample.model_validate(SEALED).category == "SEARCH/outdoor"
+    for change in [{"kind": "other"}, {"answer": "x"}, {"context": "none"}, {"route": "GUARD"}]:
+        with pytest.raises(ValueError):
+            SealedExample.model_validate({**SEALED, **change})
+    sealed = tmp_path / "test_sealed.jsonl"
+    sealed.write_text(json.dumps(SEALED) + "\n")
+    report = validate_dataset(sealed)
+    assert report.errors == [] and report.counts == {"SEARCH/outdoor": 1}
