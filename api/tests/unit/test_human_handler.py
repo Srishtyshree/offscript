@@ -163,9 +163,9 @@ def test_all_s11_questions_strictly_under_20_words():
     for q, ctx in test_inputs:
         card = generate_human_card_content(q, ctx)
         words = card.suggested_question.split()
-        assert (
-            len(words) < 20
-        ), f"Question exceeded 20 words ({len(words)}): {card.suggested_question}"
+        assert len(words) < 20, (
+            f"Question exceeded 20 words ({len(words)}): {card.suggested_question}"
+        )
 
 
 def test_validation_raises_when_question_too_long():
