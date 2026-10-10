@@ -1,8 +1,9 @@
 """Format and validation for labelled router examples (training data and the sealed test set).
 
-Check a file before committing it:
+Check a file before committing it (the sealed test set is detected by its file name):
 
     uv run python -m offscript_contract.dataset training/data/train.jsonl
+    uv run python -m offscript_contract.dataset training/data/test_sealed.jsonl
 """
 
 import json
@@ -10,46 +11,64 @@ import sys
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from offscript_contract.router import (
     NO_CONTEXT,
-    Fit,
+    ROUTER_OUTPUT,
+    AIOutput,
+    HumanOutput,
     InputError,
     Route,
     RouterInput,
-    RouterOutput,
+    SearchOutput,
     normalize_input,
+    to_target_json,
 )
+
+ROUTE_FIELDS = ("answer", "search_query", "who_to_ask", "suggested_question", "outdoor_action")
+
+
+def _check_clean_input(question: str, context: str) -> None:
+    """Rows store input exactly as the model will see it after normalize_input."""
+    try:
+        cleaned = normalize_input(question, context)
+    except InputError as error:
+        raise ValueError(str(error)) from None
+    if cleaned.question != question:
+        raise ValueError("question has extra spaces, line breaks or control characters")
+    if context and cleaned.context != context:
+        raise ValueError("context has extra spaces, line breaks or control characters")
+    if context.lower() == NO_CONTEXT:
+        raise ValueError('leave context as "" instead of writing "none"')
 
 
 class LabelledExample(BaseModel):
-    """One JSONL row. `context` is "" when there is none. Text must already be clean,
-    so every file stores questions exactly as the model will see them."""
+    """One JSONL row: the input, the route, a reason and only that route's fields.
+
+    `context` is "" when there is none. Text must already be clean, so every file stores
+    questions exactly as the model will see them.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,40}$")
     question: str
     context: str
-    fit: Fit
-    route: Route | None
+    route: Route
     reason: str
+    answer: str | None = None
+    search_query: str | None = None
+    who_to_ask: str | None = None
+    suggested_question: str | None = None
+    outdoor_action: str
 
     @model_validator(mode="after")
     def _clean_and_consistent(self) -> "LabelledExample":
-        try:
-            cleaned = normalize_input(self.question, self.context)
-        except InputError as error:
-            raise ValueError(str(error)) from None
-        if cleaned.question != self.question:
-            raise ValueError("question has extra spaces, line breaks or control characters")
-        if self.context and cleaned.context != self.context:
-            raise ValueError("context has extra spaces, line breaks or control characters")
-        if self.context.lower() == NO_CONTEXT:
-            raise ValueError('leave context as "" instead of writing "none"')
-        RouterOutput(fit=self.fit, route=self.route, reason=self.reason)
+        _check_clean_input(self.question, self.context)
+        _ = self.label  # validates the route's fields with the router's own rules
         return self
 
     @property
@@ -57,18 +76,49 @@ class LabelledExample(BaseModel):
         return normalize_input(self.question, self.context)
 
     @property
-    def label(self) -> RouterOutput:
-        return RouterOutput(fit=self.fit, route=self.route, reason=self.reason)
+    def label(self) -> AIOutput | SearchOutput | HumanOutput:
+        payload = {"route": self.route.value, "reason": self.reason}
+        payload |= {name: getattr(self, name) for name in ROUTE_FIELDS if getattr(self, name)}
+        return ROUTER_OUTPUT.validate_python(payload)
+
+    @property
+    def target_json(self) -> str:
+        return to_target_json(self.label)
 
     @property
     def category(self) -> str:
-        """AI, SEARCH or HUMAN for outings; the fit value otherwise."""
-        return self.route.value if self.route else self.fit.value
+        return self.route.value
+
+
+class SealedExample(BaseModel):
+    """One sealed-test row: the input and its correct route only. Content fields are not
+    scored against a reference; they are checked by rules during evaluation."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,40}$")
+    question: str
+    context: str
+    route: Route
+    kind: Literal["outdoor", "general"]
+
+    @model_validator(mode="after")
+    def _clean(self) -> "SealedExample":
+        _check_clean_input(self.question, self.context)
+        return self
+
+    @property
+    def router_input(self) -> RouterInput:
+        return normalize_input(self.question, self.context)
+
+    @property
+    def category(self) -> str:
+        return f"{self.route.value}/{self.kind}"
 
 
 @dataclass
 class DatasetReport:
-    examples: list[LabelledExample] = field(default_factory=list)
+    examples: list[LabelledExample | SealedExample] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
     @property
@@ -76,8 +126,14 @@ class DatasetReport:
         return Counter(example.category for example in self.examples)
 
 
-def validate_dataset(path: str | Path) -> DatasetReport:
-    """Check every line; report each problem with its line number. Never stops early."""
+def validate_dataset(path: str | Path, row_model: type[BaseModel] | None = None) -> DatasetReport:
+    """Check every line; report each problem with its line number. Never stops early.
+
+    Files named `test_sealed*.jsonl` are checked as SealedExample, everything else as
+    LabelledExample, unless `row_model` is given.
+    """
+    if row_model is None:
+        row_model = SealedExample if Path(path).name.startswith("test_sealed") else LabelledExample
     report = DatasetReport()
     seen_ids: dict[str, int] = {}
     seen_questions: dict[str, int] = {}
@@ -86,7 +142,7 @@ def validate_dataset(path: str | Path) -> DatasetReport:
             report.errors.append(f"line {number}: blank line")
             continue
         try:
-            example = LabelledExample.model_validate(json.loads(line))
+            example = row_model.model_validate(json.loads(line))
         except json.JSONDecodeError as error:
             report.errors.append(f"line {number}: not valid JSON ({error.msg})")
             continue

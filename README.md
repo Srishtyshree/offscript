@@ -14,6 +14,26 @@ A mobile-first web app that turns a question about something you want to do near
 | `training/` | Datasets, Tinker fine-tuning and evaluation (offline) |
 | `docs/` | Product and team docs |
 
+## Model
+
+| | |
+|---|---|
+| Base model | `Qwen/Qwen3.5-9B` on Tinker, LoRA fine-tune (rank 32) |
+| Fine-tuned router | `tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012` |
+| Router prompt | version `e018ffbee7cc` (frozen; the checkpoint only works with this prompt) |
+| Training data | 120 reviewed questions (`training/data/train.jsonl`) |
+| Test data | 32 sealed questions (`training/data/test_sealed.jsonl`), never used for training or prompt tuning |
+
+Results on the sealed set, same prompt and settings for both models:
+
+| | Base | Fine-tuned |
+|---|---|---|
+| Routing | 30/32 | 32/32 |
+| AI answers within target length | 55% | 82% |
+| Content-rule problems | 5 | 1 |
+
+The test set is small, so a difference of one or two questions is within noise. Full numbers and caveats: [training/runs/REPORT.md](training/runs/REPORT.md). Backend hand-off: [docs/model-handoff.md](docs/model-handoff.md).
+
 ## Setup on macOS (from scratch)
 
 Run each step in Terminal. Skip any tool that its check command shows you already have.

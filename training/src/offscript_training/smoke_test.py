@@ -16,8 +16,9 @@ from tinker_cookbook.renderers import TrainOnWhat, get_text_content
 from tinker_cookbook.supervised.common import compute_mean_nll
 from tinker_cookbook.supervised.data import conversation_to_datum
 
-BASE_MODEL = "Qwen/Qwen3-8B"
-RENDERER = "qwen3_disable_thinking"
+from offscript_contract.router import BASE_MODEL
+from offscript_contract.router import RENDERER_NAME as RENDERER
+
 LORA_RANK = 16
 STEPS = 5
 LEARNING_RATE = 2e-4
@@ -25,21 +26,28 @@ CHECKPOINT_TTL_SECONDS = 24 * 3600  # throwaway checkpoint: auto-deleted after a
 
 # Placeholder prompt and labels to check the mechanics only; the real router prompt is in contract/.
 SYSTEM_PROMPT = (
-    'Reply only with JSON: {"fit": "ok"|"scope_nudge"|"context_request"|"split_request", '
-    '"route": "AI"|"SEARCH"|"HUMAN"|null, "reason": "<one short sentence>"}'
+    'Reply only with JSON: {"route": "AI"|"SEARCH"|"HUMAN", "reason": "<one sentence>", '
+    'plus "answer" for AI, "search_query" for SEARCH, or "who_to_ask" and '
+    '"suggested_question" for HUMAN, plus "outdoor_action"}'
 )
 EXAMPLES = [
     (
         "Question: What do regulars buy at this stall?\nContext: at the outdoor market",
-        '{"fit":"ok","route":"HUMAN","reason":"Regulars know what is good here."}',
+        '{"route":"HUMAN","reason":"Regulars know what is good here.",'
+        '"who_to_ask":"a regular customer","suggested_question":"What do you usually get here?",'
+        '"outdoor_action":"Ask a willing regular, then try it."}',
     ),
     (
         "Question: Is the museum open today? I want to visit.\nContext: none",
-        '{"fit":"ok","route":"SEARCH","reason":"Opening hours change and need a live source."}',
+        '{"route":"SEARCH","reason":"Opening hours change and need a live source.",'
+        '"search_query":"museum opening hours today",'
+        '"outdoor_action":"If it is open, visit today."}',
     ),
     (
         "Question: What is photosynthesis?\nContext: none",
-        '{"fit":"scope_nudge","route":null,"reason":"Fully answered on screen; no outing."}',
+        '{"route":"AI","reason":"This is stable textbook knowledge.",'
+        '"answer":"Plants use sunlight, water and carbon dioxide to make sugar and oxygen.",'
+        '"outdoor_action":"Look closely at a leaf in sunlight on your next walk."}',
     ),
 ]
 
@@ -89,7 +97,7 @@ async def run() -> int:
 
     print(f"[1/4] Creating LoRA training client on {BASE_MODEL} (rank {LORA_RANK})")
     trainer = await service.create_lora_training_client_async(base_model=BASE_MODEL, rank=LORA_RANK)
-    renderer = renderers.get_renderer(RENDERER, trainer.get_tokenizer())
+    renderer = renderers.get_renderer(RENDERER, trainer.get_tokenizer(), model_name=BASE_MODEL)
 
     print("[2/4] Sampling the base model")
     base = await service.create_sampling_client_async(base_model=BASE_MODEL)

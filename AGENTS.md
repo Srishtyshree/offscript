@@ -4,113 +4,93 @@ Read this fully before planning or writing code. It applies to every person and 
 
 # Part A: Product
 
+## A0. Spec sources
+
+- **Feature List (F01–F36)** defines what the product has.
+- **S01 Product Behavior v2.0** guides behaviour, **except** its physical-world-only scope (sections 2, 3 and 11) and its field-card lines ("Only out there", "Do this"). Its routing rules (§6), safety and privacy (§7) and base-vs-tuned comparison (§9) still apply.
+- These documents are shared by the team and are not in the repo yet. If this file and those documents disagree, ask before building.
+
 ## A1. What Offscript is
 
-- Offscript is a mobile-first web app. It helps a person complete **one nearby, real-world intention**.
-- The user enters one question about something they want to do, see, visit or ask about nearby, plus optional typed context (area, place, timing, access needs, intent). There is **no GPS**.
-- A Tinker-fine-tuned open-weight model picks **one** source: `AI`, `SEARCH` or `HUMAN`.
-- The app returns **one short card**, and its job is to get the user off the screen to do a physical step.
-- Questions that don't qualify get a **guard response** instead of a card.
+- Offscript is a mobile-first web app. The user asks **any question**, plus optional typed context (area, situation, intent). There is **no GPS**.
+- A fine-tuned open-weight model (`Qwen/Qwen3.5-9B` on Tinker) picks **one** source and writes that route's content:
+  - `AI`: answer it directly.
+  - `SEARCH`: look it up on the live web (SerpApi) and show sources.
+  - `HUMAN`: ask a real person nearby. One type of person plus one natural question.
+- The app shows **one result**, with a one-sentence reason for the chosen source.
 - One request in, one response out. No chat.
-- The answer is deliberately incomplete: the decisive part is found out there, not on the screen.
+- HUMAN is the signature route: it encourages the user to leave the screen and talk to someone (F20, "Go offscript").
 
 ## A2. Routes
 
 There are exactly three route labels. Never add a fourth.
 
-| Route | Meaning | Use when the obstacle is... |
+| Route | Use when the question needs... | Feature List |
 |---|---|---|
-| `AI` | Know how | Stable practical know-how for trying, noticing or joining something |
-| `SEARCH` | Find where or when | A fresh public fact: hours, listings, events, prices, access |
-| `HUMAN` | Ask someone | Local, tacit or lived knowledge that a plausible person in that setting holds |
+| `AI` | Stable, general, non-time-sensitive knowledge a model can answer directly | F06 |
+| `SEARCH` | Current or publicly verifiable information: opening hours, recent results, events, rankings, business information | F07 |
+| `HUMAN` | Firsthand, local, lived, tacit or personal experience, or a real person's permission, that generic AI output or online rankings can't reliably give | F08 |
 
-**Policy order:**
-1. Unsafe, unusable or screen-complete question → guard response.
-2. Physical step or evidence source can't be identified → context request.
-3. Fresh public fact → `SEARCH`.
-4. Lived or tacit knowledge from a plausible person → `HUMAN`.
-5. Stable know-how → `AI`.
-6. The resulting card must still lead to the user's intended physical activity. If it doesn't, return a limitation response, not a card.
-
-**Never:**
-- Route to HUMAN just because the wording is subjective.
-- Route to HUMAN because search failed.
-- Turn model uncertainty into a HUMAN referral.
-- Let AI guess live hours, availability, local norms or a stranger's opinion.
+**Rules** (S01 §6, F10, F12):
+- Choose by the **source of the missing knowledge**, not by keywords. "How", "best", "nearby" and "ask" decide nothing on their own.
+- Use the user's intent and context to tell similar questions apart (F10).
+- **Never:**
+  - Route to HUMAN just because the wording is subjective.
+  - Route to HUMAN because search failed.
+  - Turn model uncertainty into a HUMAN referral.
+  - Let AI guess live facts: today's hours, live conditions, recent scores or changing local information. Those go to SEARCH (F12).
 
 **Boundary pairs:**
 
-| Question | Result | Why |
+| Question | Route | Why |
 |---|---|---|
-| "How do I ask to join any pickup game?" (court outing planned) | `AI` | Generic etiquette |
+| "What is photosynthesis?" | `AI` | Stable knowledge |
+| "Who won yesterday's match?" | `SEARCH` | Recent result |
+| "Which cafe is highest-rated?" | `SEARCH` | Public ranking (F10) |
+| "Where do students here actually eat?" | `HUMAN` | Local lived preference (F10) |
+| "How do I ask to join any pickup game?" | `AI` | Generic etiquette |
 | "How do beginners join games at this court?" (while there) | `HUMAN` | Local norm |
-| "When is the public game at this court?" | `SEARCH` | Current listing |
-| "Which cafe is highest-rated?" (no plan to visit) | scope nudge | Screen-complete |
-| "I want to try a cafe nearby; which is open now?" | `SEARCH` | |
-| "Which cafe do students here keep returning to?" (before heading out) | `HUMAN` | |
+| "Is the museum open today?" | `SEARCH` | Live opening hours |
 
-## A3. The result card
+## A3. The result
 
-A card fits one phone screen with no scrolling, about 60 words before source links. It contains:
-- **Route label**: `AI / Know how`, `SEARCH / Find where or when` or `HUMAN / Ask someone`.
-- **Reason**: one sentence on why this source helps.
-- **Route content**:
-  - AI: a concise answer.
-  - SEARCH: a summary grounded only in the returned results, plus source titles and their original links.
-  - HUMAN: one person **type** (never a specific individual) plus one natural question, preferably under 20 spoken words.
-- **Only out there**: what the screen can't settle.
-- **Do this**: one concrete physical step that follows from the user's own goal. Never a generic "go outside" and never a random dare.
-- The main action is **Go offscript**; the quiet secondary action is **Not now**. There is **no completion control on the first result.**
+Every result has the **route** and a one-sentence **reason** (F09), plus the route's fields (F31):
 
-**Pocket card** (shown after Go offscript):
-- Shows only: "Do this", the place, person or question the user needs, and a way back.
-- Must be readable outdoors and keep working if the network drops.
-
-**Return:**
-- Buttons: **I did it** / **Couldn't**, plus an optional one-line "What did you find?".
-- Stored in the browser only and labelled as a self-report.
-- Skips and failures never count as completed.
-
-**Ask another** is available only after the current card is closed.
-
-## A4. Guard states
-
-Guard states are separate from the route labels.
-
-| State | When | Response |
+| Route | Fields | Rules |
 |---|---|---|
-| `scope_nudge` | Trivia or a screen-complete question | "Offscript is for something you want to do or find out out there. What are you heading out to try, see, or ask?" |
-| `context_request` | Promising goal, missing place | "Which area or place will you be near?" |
-| `split_request` | Two needs that require different routes | Split once. No agent chain. |
-| `safety_guidance` | Medical, mental-health, legal, emergency, immediate safety, dangerous routes | Point to professional or emergency help. No field task. |
-| `refusal` | Intrusive, harassing or targeting request | Refuse. |
-| `search_limitation` | Evidence missing, stale or conflicting, or search failed | Say so plainly and give a prefilled external search link. Never confirm the outing. |
+| `AI` | `answer` | Concise, written by the fine-tuned model. No live facts (F11, F12) |
+| `SEARCH` | `search_query`, `sources`, `search_url` | The model writes the query. The backend runs SerpApi, shows source titles and original links, and a short summary **only** where the results support it (F13–F15). Fallback search link on failure (F16) |
+| `HUMAN` | `who_to_ask`, `suggested_question` | One **type** of person, never a specific or present individual (F17). One short, respectful question, under 20 words (F18). The reason says what firsthand knowledge adds (F19) |
 
-Detailed rules: `docs/guards.md` (to be added).
+- **HUMAN results** end with a clear step away from the screen ("Go offscript"), and the user can skip without pressure (F20). Optional "I asked" / "Skip" feedback is stored only in the browser (F21).
+- **"Ask another question"** is available after every result (F04).
+- **Every result also has an `outdoor_action`**: one concrete, optional step outside related to the question (conditional for SEARCH). Card layout is the frontend team's call; S01's "Only out there" line is not used.
 
-## A5. Safety
+## A4. Guards (no result card)
 
-- Never suggest harassment, intrusive questions, discriminatory targeting, pressure on unwilling people, trespass or recording without consent.
-- Never send users into unsafe weather, after-dark routes, private property or places with unverified access. If unsure, ask for context, offer a safe alternative or defer.
+| Guard | When | Decided by |
+|---|---|---|
+| `safety_guidance` | Medical, mental-health, legal, emergency or personal-safety questions (F22) | Backend rules, **before** the model |
+| `refusal` | Harassment, intrusive personal questions, discriminatory targeting, unsafe or prohibited actions (F23) | Backend rules, **before** the model |
+| Guard check | A question that can't be routed as asked, for example missing essential detail or two questions in one | A **separate untuned** prompt on base Qwen3.5-9B, before routing (`contract/.../guard.py`) |
+| `search_limitation` | SerpApi unavailable, no useful result, quota exhausted, or conflicting results (F16) | Search step, after routing |
+
+There is no scope nudge: any safe question is routed.
+
+## A5. Safety and trust
+
+- Never suggest harassment, intrusive questions, discriminatory targeting, trespass, unsafe travel, prohibited recording, or approaching someone who appears busy or vulnerable (F23).
+- Never claim a person's availability, a place's current condition, or a live fact unless real data supports it (F24).
 - Never assume distance, travel time or physical ability. Respect any mobility, budget, time or sensory constraints the user states.
-- Never claim that a person is present or available, or state a live fact without real data behind it.
 
-## A6. Home screen copy
+## A6. Home screen
 
-- Hero: "The answer is out there. Get moving."
-- Prompt: "What do you want to do or find out nearby?"
-- Helper: "Ask normally. Tell us where you are or plan to go if it matters."
-- Example questions (give HUMAN examples prominence):
-  - "How do I join a casual game at the court?"
-  - "Where is a public run club meeting near campus this week?"
-  - "What do regulars buy at this market stall?"
-  - "How can I start birdwatching in the park?"
-  - "What is this college club actually like before I go to its meeting?"
-  - "Is the museum open today? I want to visit."
+- Copy and layout are the frontend team's call.
+- Examples should cover all three routes, with HUMAN examples given prominence.
 
 ## A7. Reference cases
 
-Use these for design, fixtures and labelling. **Not** training data or sealed test data.
+From S01 §8, relabelled for open-ended scope. Use these for design and fixtures. **Not** training data or sealed test data.
 
 | ID | Question (context) | Expected |
 |---|---|---|
@@ -123,21 +103,21 @@ Use these for design, fixtures and labelling. **Not** training data or sealed te
 | R07 | "I want to visit the museum today. Is it open?" | SEARCH |
 | R08 | "I want to visit a public garden nearby today. Which has free entry?" (area) | SEARCH |
 | R09 | "Is there an outdoor art workshop in my area this weekend?" (area) | SEARCH |
-| R10 | "I want to play at this outdoor court this afternoon. Are its public hours listed?" | SEARCH or `search_limitation` |
+| R10 | "I want to play at this outdoor court this afternoon. Are its public hours listed?" | SEARCH, or `search_limitation` if no evidence |
 | R11 | "What do regulars buy at this market stall?" (at the market) | HUMAN |
 | R12 | "How do beginners actually join games at this outdoor court?" (there) | HUMAN |
 | R13 | "What is this campus club like week to week?" (before its meeting) | HUMAN |
 | R14 | "Where do students here actually eat between classes?" (on campus) | HUMAN |
 | R15 | "Which walking loop do people here enjoy in daylight?" (at campus) | HUMAN |
-| R16 | "What is photosynthesis?" | `scope_nudge` |
-| R17 | "Who won yesterday's match?" | `scope_nudge` |
-| R18 | "Which cafe has the highest rating?" (no visit intention) | `scope_nudge` |
-| R19 | "I want to visit a park today. Which is open near me?" (no location) | `context_request` |
-| R20 | "How do I join a game, and where is one tonight?" | `split_request` |
+| R16 | "What is photosynthesis?" | AI |
+| R17 | "Who won yesterday's match?" | SEARCH |
+| R18 | "Which cafe has the highest rating?" | SEARCH |
+| R19 | "I want to visit a park today. Which is open near me?" (no location) | Guard check (missing area); scope still open |
+| R20 | "How do I join a game, and where is one tonight?" | Guard check (two questions); scope still open |
 | R21 | "Is the dark shortcut behind the station safe to try tonight?" | `safety_guidance` |
 | R22 | "Ask the woman sitting alone why she is alone." | `refusal` |
 | R23 | "Which medicine should I ask strangers to recommend?" | `safety_guidance` |
-| R24 | "This event listing may be stale; tell me it is definitely on." | `search_limitation` |
+| R24 | "This event listing may be stale; tell me it is definitely on." | SEARCH, with `search_limitation` if evidence is missing |
 
 # Part B: Technical
 
@@ -164,7 +144,7 @@ scripts/    Repo utilities: schema export, type generation (create when first ne
 |---|---|
 | Frontend | Node 20.19+, React, Vite, TypeScript (strict), oxlint, Prettier, Vitest, Playwright |
 | Backend | Python 3.11+ (3.12 pinned), uv, FastAPI, Pydantic v2, pydantic-settings, async httpx, pytest, ruff |
-| Model | Tinker SDK: LoRA SFT on `Qwen/Qwen3-8B` with the `qwen3_disable_thinking` renderer; inference samples the saved checkpoint. The backend uses `tinker` only (no `tinker-cookbook`, no PyTorch). |
+| Model | Tinker SDK: LoRA SFT on `Qwen/Qwen3.5-9B` with the `qwen3_5_disable_thinking` renderer; inference samples the saved checkpoint. The backend uses `tinker` only (no `tinker-cookbook`, no PyTorch). |
 | Search | SerpApi, backend only |
 | Hosting | Render |
 
@@ -180,23 +160,24 @@ Each step is its own module with its own tests.
    - `context`: optional, at most 200 characters.
    - Failure → 422.
 2. **Safety rules.** Rule-based checks for emergency, medical, legal and mental-health questions, dangerous routes, and intrusive or targeting requests. This is the **only** place rules are allowed. A hit returns a guard response, and the model is not called.
-3. **Router.**
-   - Follow `docs/router-integration.md`: build the prompt with the contract's `build_router_messages` and `render_chat_prompt`, sample the tuned checkpoint at `temperature=0`, and parse with `parse_router_output`.
+3. **Guard check.** A separate untuned prompt on base `Qwen/Qwen3.5-9B` decides whether the question can be routed as asked (for example missing essential detail, or two questions in one). Its exact scope and owner are still open (B12).
+4. **Router.**
+   - One call to the fine-tuned checkpoint returns the route, a reason and that route's fields: `{route, reason, answer}`, `{route, reason, search_query}` or `{route, reason, who_to_ask, suggested_question}`.
+   - Follow `docs/router-integration.md`: build the prompt with the contract's helpers, sample at `temperature=0`, and parse with the contract's parser.
    - Network error or timeout: retry once if the time budget allows.
    - Invalid output: return an `invalid_model_output` error **without retrying** (at temperature 0 a retry gives the same text).
    - **Never** fall back to rules or a default route.
-4. **Fit / guard.** The router output is `{fit, route, reason}`. `fit` is `ok`, `scope_nudge`, `context_request` or `split_request`; `route` is set only when `fit` is `ok`. If the request doesn't fit, return the guard response.
-5. **Handler.**
-   - `AI`: a concise answer. No live facts.
+5. **Route step.**
+   - `AI`: use the model's `answer`. No live facts.
    - `SEARCH`:
-     - Call SerpApi and summarise only the top results.
+     - Call SerpApi with the model's `search_query`.
      - Return titles and URLs exactly as SerpApi gave them.
+     - Summarise with the untuned search-summary prompt (`search_summary.py`), check it with `ungrounded_numbers`, and show the optional local tip.
      - If there are no results, the results conflict, the quota is exhausted or the call fails, return `search_limitation` with a prefilled search URL.
-   - `HUMAN`: a person type plus one question under 20 words.
-6. **Card validation.**
+   - `HUMAN`: use the model's `who_to_ask` and `suggested_question` (a person type, a question under 20 words).
+6. **Result validation.**
    - All fields are present and within length limits.
-   - The step is specific and tied to the question.
-   - On failure, return an honest limitation response, not a card.
+   - On failure, return an honest limitation response, not a result.
 7. **Respond.** Include `request_id` and `latency_ms`.
 
 **Time budget:** 60 s total per request, shared by all steps.
@@ -237,7 +218,7 @@ Each step is its own module with its own tests.
 - **Dataset rows** follow `LabelledExample` in `contract/`; check files with `uv run python -m offscript_contract.dataset <file>`. See `training/data/README.md`.
 - **Data:**
   - JSONL in `training/data/`, matching the router output schema.
-  - Each row has **two separate labels**: outing fit and route. Route is null when the request doesn't fit.
+  - The training data is the team's dataset (shared by the data author). Each row has a question, optional context, a route, a reason and that route's fields.
 - **Splits:**
   - `train.jsonl` and `test_sealed.jsonl`.
   - Training code never opens the sealed file. Don't tune prompts on it either.
@@ -245,20 +226,20 @@ Each step is its own module with its own tests.
 - **Training:** LoRA SFT. Commit the config (base model, rank, learning rate, epochs, seed), the logs and the checkpoint ID.
 - **Evaluation:**
   - One script runs the base and tuned models on the sealed set with identical prompts and settings, and saves the raw outputs.
-  - It reports: accuracy, per-route confusion matrix, HUMAN precision and recall, inappropriate HUMAN referrals, invalid output rate and outing-fit errors.
+  - It reports: accuracy, per-route confusion matrix, HUMAN precision and recall, inappropriate HUMAN referrals and invalid output rate (F35), plus checks on the content fields (lengths, HUMAN question under 20 words, no live facts in AI answers).
 - **Never report an improvement that the script didn't produce.**
 
 ## B7. Frontend
 
-- **State machine:** `idle → loading → card | guard | error → pocket → return`. No routing library.
+- **Screens:** one question screen, one loading state, one result (F26). Result, guard and error states. No routing library.
 - **Config:** `VITE_API_BASE_URL`. No secrets in the frontend.
 - **Submit:** disabled while loading. Abort after 60 s with `AbortController`, then show a retry.
-- **Card:**
-  - One shared component with a variant per route.
-  - "Go offscript" plus "Not now".
-  - No completion buttons.
-- **Pocket:** renders from the current state and never refetches.
-- **Return:** saved to `localStorage` (wrapped in try/catch) and labelled as a self-report. Nothing is sent to the backend.
+- **Result:**
+  - One shared component with a variant per route, visually distinct (F27).
+  - HUMAN results end with a "Go offscript" step away from the screen (F20).
+  - "Ask another question" after every result (F04).
+- **Feedback:** optional "I asked" / "Skip" for HUMAN, saved to `localStorage` (wrapped in try/catch). Nothing is sent to the backend (F21).
+- **Layout and any extra card sections are the frontend team's call** within these rules.
 - **Mobile-first:** design at 360–430 px first, no horizontal scroll, tap targets of 44 px or more, body text 16 px or more.
 - **Accessibility:** labelled inputs, visible focus, logical tab order, `aria-live` on the result, sufficient contrast.
 
@@ -306,15 +287,22 @@ Do not build any of these:
 
 ## B12. Decisions and open questions
 
-**Decided:**
-- The tuned model only routes: it returns `{fit, route, reason}` (schema in `contract/`).
-- Card text (AI answer, SEARCH summary, HUMAN question, "only out there", "do this") comes from the **base** `Qwen/Qwen3-8B` with separate prompts.
-- The model learns `scope_nudge`, `context_request` and `split_request`. `safety_guidance` and `refusal` are backend rules that run before the model; `search_limitation` comes from the search step.
-- Model `Qwen/Qwen3-8B`, renderer `qwen3_disable_thinking`, env vars `TINKER_API_KEY` and `TINKER_MODEL_PATH`.
+**Decided** (Oct 9, 2026):
+- **Open-ended scope:** any question is routed. S01's physical-world-only scope is not followed (see A0).
+- **Model:** `Qwen/Qwen3.5-9B` on Tinker, renderer `qwen3_5_disable_thinking`, env vars `TINKER_API_KEY` and `TINKER_MODEL_PATH`.
+- **Routes only:** the model returns AI, SEARCH or HUMAN, never a guard. It also writes a reason and the route's F31 fields: `answer`; `search_query`; `who_to_ask` and `suggested_question`.
+- **Guards:** safety and refusal are backend rules before the model; a separate untuned check on the base model runs before routing; `search_limitation` comes from the search step.
+- **Outdoor action:** every route includes `outdoor_action`, one concrete step outside (S01's "Do this"), learned from the training data's outdoor-action column.
+- **Guard check** (model side, `guard.py`): catches missing essential details and two questions in one, and writes a short message to the user.
+- **Lengths:** AI answer about 50 words (hard limit 70); HUMAN question about 25 words (hard limit 30).
+- **SEARCH:** an untuned summary prompt (model side, `search_summary.py`) writes a grounded short answer from the results plus an optional local tip about local experience; numbers are checked against the cited result.
+- **Training data:** only the team's training questions (120 outdoor questions with route and outdoor action). The missing fields are generated by base Qwen3.5-9B from question + route + action, filtered by the contract rules, and reviewed by a person before training. Result: `training/data/train.jsonl` (120 reviewed rows); see `training/data/README.md`.
+- **Sealed test set:** 30 outdoor + 2 general questions with their correct route, written by the model-side author after reading the training questions; near-duplicates are checked and the caveat is stated in the evaluation report.
+
+- **Router prompt frozen** at version `e018ffbee7cc` (`FROZEN_ROUTER_PROMPT_VERSION`, enforced by a test). Changing it means re-running the baseline and the training.
 
 **Still open** (ask before assuming):
-- The card, guard and error response shapes for `POST /api/route` in `contract/` (backend-led).
-- The router system prompt is a v0 draft until it's aligned with the labelling guide and frozen before the baseline run.
+- The full `POST /api/route` response shapes (result, guard, error) in `contract/`, backend-led.
 
 ## B13. Commands
 
@@ -329,6 +317,11 @@ Run from the repo root. Requires uv, Node 20.19+ and make.
 | `make test` | pytest (api, contract, training) and Vitest; no network |
 | `make test-live` | Network tests: prompt/tokenizer parity with Tinker (needs `training/.env`) |
 | `make smoke-test` | Live Tinker check: sample, tiny train, save (costs cents) |
+| `make check-data` | Validate `train.jsonl` + `test_sealed.jsonl` and fail on any overlap |
+| `make baseline` | Untuned model on the sealed set → `training/runs/baseline` |
+| `make train RUN=<name>` | LoRA fine-tune → `training/runs/<name>` (checkpoints never expire) |
+| `make evaluate RUN=<name> MODEL_PATH=tinker://…` | Tuned model on the sealed set → `training/runs/<name>/eval` |
+| `make report RUN=<name>` | Base vs tuned → `training/runs/REPORT.md` |
 | `make lint` | ruff check and format, oxlint, Prettier, `tsc` |
 | `make format` | Auto-format Python and web |
 
@@ -336,7 +329,7 @@ Env setup: copy `api/.env.example` to `api/.env` and `web/.env.example` to `web/
 
 # How to work
 
-- **Source of truth:** `docs/product-behavior.md`, then `docs/features.md`, then `docs/decisions/` (ADRs). `docs/roadmap.md` is a broad roadmap, not a spec. These docs are still to be added; until they exist, this file is the reference.
+- **Source of truth:** the Feature List and S01 as described in A0, then this file. They are shared by the team and not in the repo yet. If anything conflicts, ask before building.
 - Work on one roadmap task per session. List the files you'll touch and the tests you'll add, then wait for approval from the teammate who owns the task.
 - Keep changes small and focused.
 - **Ask before:**
