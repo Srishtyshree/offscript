@@ -13,14 +13,14 @@ export interface SearchSource {
 
 export interface AiContent {
   answer: string
-  outdoor_action: string
+  outdoor_action: string | null
 }
 
 export interface SearchContent {
   search_query: string
   sources: SearchSource[]
   search_url: string
-  outdoor_action: string
+  outdoor_action: string | null
   summary?: string | null
   summary_source?: number | null
   local_tip?: string | null
@@ -29,7 +29,7 @@ export interface SearchContent {
 export interface HumanContent {
   who_to_ask: string
   suggested_question: string
-  outdoor_action: string
+  outdoor_action: string | null
 }
 
 export interface CardResponse {

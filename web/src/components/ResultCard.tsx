@@ -1,16 +1,6 @@
 import React from 'react'
 import type { CardResponse, AiContent, SearchContent, HumanContent } from '../types/route'
-
-// The site the search summary relies on, e.g. "karnatakatourism.org", or null if unknown.
-function citedSite(content: SearchContent): string | null {
-  const source = content.summary_source ? content.sources[content.summary_source - 1] : undefined
-  if (!source) return null
-  try {
-    return new URL(source.url).hostname.replace(/^www\./, '')
-  } catch {
-    return null
-  }
-}
+import { citedSite } from './answerHelpers'
 
 interface ResultCardProps {
   card: CardResponse
@@ -137,14 +127,16 @@ export const ResultCard: React.FC<ResultCardProps> = ({ card, onGoOffscript, onD
         </div>
       )}
 
-      {/* Target Physical Step: Outdoor Action */}
-      <div className="do-this-block">
-        <div className="do-this-header">
-          <span className="do-this-badge">🎯 Outdoor Action</span>
-          <span className="do-this-subtitle">Follow your goal</span>
+      {/* Target Physical Step: Outdoor Action (absent when no real-world step helps) */}
+      {content.outdoor_action && (
+        <div className="do-this-block">
+          <div className="do-this-header">
+            <span className="do-this-badge">🎯 Outdoor Action</span>
+            <span className="do-this-subtitle">Follow your goal</span>
+          </div>
+          <div className="do-this-body">{content.outdoor_action}</div>
         </div>
-        <div className="do-this-body">{content.outdoor_action}</div>
-      </div>
+      )}
 
       {/* Mobile Ergonomic Action Dock */}
       <div className="card-actions">

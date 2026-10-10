@@ -12,10 +12,12 @@ export const PocketCard: React.FC<PocketCardProps> = ({ card, onReturn }) => {
   return (
     <div className="pocket-wrapper">
       {/* Target Step: Bold & Sun-readable */}
-      <div className="pocket-action-card">
-        <div className="pocket-action-title">Outdoor Action</div>
-        <div className="pocket-action-text">{content.outdoor_action}</div>
-      </div>
+      {content.outdoor_action && (
+        <div className="pocket-action-card">
+          <div className="pocket-action-title">Outdoor Action</div>
+          <div className="pocket-action-text">{content.outdoor_action}</div>
+        </div>
+      )}
 
       {/* Route Specific Pocket Helper */}
       {route === 'AI' && (

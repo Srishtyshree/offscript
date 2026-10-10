@@ -6,6 +6,7 @@ import type {
   RouteResponse,
   SearchContent,
 } from '../types/route'
+import { citedSite, hasRealWorldStep } from './answerHelpers'
 
 interface InlineAnswerProps {
   response: RouteResponse
@@ -63,7 +64,7 @@ export const InlineAnswer: React.FC<InlineAnswerProps> = ({
           </div>
         )}
         <div className="inline-answer-actions">
-          {onOpenReport && (
+          {onOpenReport && hasRealWorldStep(response) && (
             <button type="button" className="inline-report-toggle-btn" onClick={onOpenReport}>
               <span>I'm back (Report Result) →</span>
             </button>
@@ -84,6 +85,17 @@ export const InlineAnswer: React.FC<InlineAnswerProps> = ({
       <div className="inline-answer-box search-answer-box">
         {response.is_mock && <span className="mock-badge">MOCK</span>}
         {search.summary && <div className="inline-answer-text">{search.summary}</div>}
+        {search.summary && citedSite(search) && (
+          <div className="search-summary-source">According to {citedSite(search)}</div>
+        )}
+        {search.summary && search.local_tip && (
+          <div className="inline-local-tip">Local tip: {search.local_tip}</div>
+        )}
+        {!search.summary && search.sources && search.sources.length > 0 && (
+          <div className="search-unverified-note">
+            <span>The results don't clearly answer this. Check the sources below.</span>
+          </div>
+        )}
         <a
           href={search.search_url}
           target="_blank"
@@ -109,7 +121,7 @@ export const InlineAnswer: React.FC<InlineAnswerProps> = ({
           </div>
         )}
         <div className="inline-answer-actions">
-          {onOpenReport && (
+          {onOpenReport && hasRealWorldStep(response) && (
             <button type="button" className="inline-report-toggle-btn" onClick={onOpenReport}>
               <span>I'm back (Report Result) →</span>
             </button>
@@ -141,7 +153,7 @@ export const InlineAnswer: React.FC<InlineAnswerProps> = ({
           </div>
         )}
         <div className="inline-answer-actions">
-          {onOpenReport && (
+          {onOpenReport && hasRealWorldStep(response) && (
             <button type="button" className="inline-report-toggle-btn" onClick={onOpenReport}>
               <span>I'm back (Report Result) →</span>
             </button>

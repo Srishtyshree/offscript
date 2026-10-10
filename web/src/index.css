@@ -759,6 +759,12 @@ h4 {
   gap: 6px;
 }
 
+.inline-local-tip {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
 .search-summary-source {
   font-size: 13px;
   color: var(--text-secondary);
