@@ -19,20 +19,21 @@ A mobile-first web app that turns a question about something you want to do near
 | | |
 |---|---|
 | Base model | `Qwen/Qwen3.5-9B` on Tinker, LoRA fine-tune (rank 32) |
-| Fine-tuned router | `tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012` |
-| Router prompt | version `e018ffbee7cc` (frozen; the checkpoint only works with this prompt) |
-| Training data | 120 reviewed questions (`training/data/train.jsonl`) |
-| Test data | 32 sealed questions (`training/data/test_sealed.jsonl`), never used for training or prompt tuning |
+| Fine-tuned router (v2.1, live) | `tinker://7422f56a-258e-5e14-85ef-aa63b9100926:train:0/sampler_weights/000030` |
+| Router prompt | `router_system_v2`, version `0fb9c7853868` (frozen; the checkpoint only works with this prompt) |
+| Training data | 1,085 reviewed rows in 212 scenario families (`training/data/v2/router_v2.jsonl`) |
+| Test data | 110 sealed questions (`training/data/test_sealed_v2.jsonl`), never used for training or prompt tuning |
 
-Results on the sealed set, same prompt and settings for both models:
+Results on the v2 sealed set, same prompt and settings for both models:
 
-| | Base | Fine-tuned |
+| | Base | Fine-tuned v2.1 |
 |---|---|---|
-| Routing | 30/32 | 32/32 |
-| AI answers within target length | 55% | 82% |
-| Content-rule problems | 5 | 1 |
+| Routing | 103/110 | 110/110 |
+| Outdoor step shown when none was needed | 9 of 41 | 1 of 41 |
+| AI answers within target length | 85% | 100% |
+| SEARCH queries adding a place the user never gave (32-question place check) | — | 0 of 28 |
 
-The test set is small, so a difference of one or two questions is within noise. Full numbers and caveats: [training/runs/REPORT.md](training/runs/REPORT.md). Backend hand-off: [docs/model-handoff.md](docs/model-handoff.md).
+The test sets are small, so a difference of one or two questions is within noise. Full numbers and caveats: [training/runs/sft-v2.1/EVALUATION.md](training/runs/sft-v2.1/EVALUATION.md) and [training/runs/REPORT_V2_1.md](training/runs/REPORT_V2_1.md). The earlier v1 model (always gives an outdoor step) is described in [training/runs/REPORT.md](training/runs/REPORT.md). Backend hand-off: [docs/model-handoff.md](docs/model-handoff.md).
 
 ## Setup on macOS (from scratch)
 

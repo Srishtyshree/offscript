@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 from offscript_contract.dataset import LabelledExample, SealedExample, validate_dataset
-from offscript_contract.router import ROUTER_PROMPT, build_router_messages
+from offscript_contract.router import ROUTER_PROMPT_V1, build_router_messages
 from offscript_training.metrics import added_names
 
 TRAIN_FILE = Path("training/data/train.jsonl")
@@ -64,7 +64,7 @@ def load_eval_rows(path: Path) -> list[dict]:
     return rows
 
 
-def to_conversation(example: LabelledExample, prompt: str = ROUTER_PROMPT) -> dict:
+def to_conversation(example: LabelledExample, prompt: str = ROUTER_PROMPT_V1) -> dict:
     """One training example in the cookbook's chat format: prompt messages + target reply."""
     messages = build_router_messages(example.question, example.context, prompt=prompt)
     return {"messages": [*messages, {"role": "assistant", "content": example.target_json}]}

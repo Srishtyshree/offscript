@@ -49,7 +49,7 @@ How the UI uses it:
 | `null` | AI or SEARCH | No step section and no "Go offscript": the answer is complete on screen |
 | `null` | HUMAN | No step section, but keep "Go offscript": asking the person is the real-world step. The pocket card shows who to ask and the question |
 
-The backend never invents a step: whatever the model returns is passed through. The v1 checkpoint always returns a step; `null` appears once v2 is live.
+The backend never invents a step: whatever the model returns is passed through. The live v2.1 checkpoint returns `null` when no real-world step helps (an email, an exchange rate); the earlier v1 checkpoint always returned a step.
 
 The reason is one line, up to 160 characters. Fields for other routes, or any extra field, make the reply invalid.
 

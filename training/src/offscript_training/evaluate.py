@@ -24,7 +24,7 @@ from offscript_contract.rendering import decode_completion, render_chat_prompt, 
 from offscript_contract.router import (
     BASE_MODEL,
     MAX_TOKENS,
-    ROUTER_PROMPT,
+    ROUTER_PROMPT_V1,
     ROUTER_PROMPT_V2,
     TEMPERATURE,
     build_router_messages,
@@ -37,11 +37,11 @@ from offscript_training.metrics import compute
 CONCURRENCY = 8
 
 
-PROMPTS = {"v1": ROUTER_PROMPT, "v2": ROUTER_PROMPT_V2}
+PROMPTS = {"v1": ROUTER_PROMPT_V1, "v2": ROUTER_PROMPT_V2}
 
 
 async def run(
-    rows: list[dict], model_path: str | None, router_prompt: str = ROUTER_PROMPT
+    rows: list[dict], model_path: str | None, router_prompt: str = ROUTER_PROMPT_V1
 ) -> list[dict]:
     service = tinker.ServiceClient()
     if model_path:
