@@ -8,12 +8,13 @@ import { QuestionForm } from './components/QuestionForm'
 import { LoadingPage } from './components/LoadingPage'
 import { SuggestionsView } from './components/SuggestionsView'
 import { ReportResultPage } from './components/ReportResultPage'
+import { LandingPage } from './components/LandingPage'
 
-type Screen = 'form' | 'loading' | 'suggestions' | 'report'
+type Screen = 'landing' | 'form' | 'loading' | 'suggestions' | 'report'
 
 export function App() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
-  const [screen, setScreen] = useState<Screen>('form')
+  const [screen, setScreen] = useState<Screen>('landing')
   const [question, setQuestion] = useState('')
   const [response, setResponse] = useState<RouteResponse | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -63,6 +64,14 @@ export function App() {
     setQuestion('')
     setResponse(null)
     setErrorMessage(null)
+  }
+
+  if (screen === 'landing') {
+    return (
+      <main className="app-content" aria-live="polite" aria-atomic="true">
+        <LandingPage onStart={() => setScreen('form')} />
+      </main>
+    )
   }
 
   return (
