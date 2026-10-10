@@ -24,11 +24,10 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
         }),
       )
       expect(html).toContain('Offscript')
-      expect(html).toContain('Mock')
-      expect(html).toContain('0.1.0')
+      expect(html).toContain('MOCK')
     })
 
-    it('renders Live label when isMock is false even if model_configured is false', () => {
+    it('does not render Live label when isMock is false', () => {
       const html = renderToString(
         React.createElement(Header, {
           version: '0.1.0',
@@ -36,19 +35,9 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
           isMock: false,
         }),
       )
-      expect(html).toContain('Live')
-      expect(html).toContain('0.1.0')
-    })
-
-    it('renders Live label when model_configured is true', () => {
-      const html = renderToString(
-        React.createElement(Header, {
-          version: '0.2.0',
-          isModelConfigured: true,
-        }),
-      )
-      expect(html).toContain('Live')
-      expect(html).toContain('0.2.0')
+      expect(html).toContain('Offscript')
+      expect(html).not.toContain('Live')
+      expect(html).not.toContain('MOCK')
     })
 
     it('renders + New button when showReset is true', () => {
@@ -65,7 +54,7 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
   })
 
   describe('QuestionForm component', () => {
-    it('renders hero title and canonical examples with HUMAN prominence', () => {
+    it('renders hero title and form inputs without examples', () => {
       const html = renderToString(
         React.createElement(QuestionForm, {
           onSubmit: () => {},
@@ -74,10 +63,6 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
       )
       expect(html).toContain('The answer is out there. Get moving.')
       expect(html).toContain('What do you want to do or find out nearby?')
-      expect(html).toContain('What do regulars buy at this market stall?')
-      expect(html).toContain('What is this college club actually like before I go to its meeting?')
-      expect(html).toContain('Where is a public run club meeting near campus this week?')
-      expect(html).toContain('How do I join a casual pickup game at the court?')
       expect(html).toContain('No GPS tracking')
     })
   })
