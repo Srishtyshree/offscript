@@ -6,26 +6,28 @@ The fine-tuned router is trained, evaluated and ready. This note covers what the
 
 | Setting | Value |
 |---|---|
-| `TINKER_MODEL_PATH` (router) | `tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012` |
+| `TINKER_MODEL_PATH` (router v2.1) | `tinker://7422f56a-258e-5e14-85ef-aa63b9100926:train:0/sampler_weights/000030` |
 | Base model (guard check, search summary) | `Qwen/Qwen3.5-9B` (`BASE_MODEL`) |
 | Renderer | `qwen3_5_disable_thinking` |
 | Sampling | `temperature=0`, `max_tokens=MAX_TOKENS` (350), `stop=[stop_token_id(tokenizer)]` |
-| Router prompt version | `e018ffbee7cc` (`FROZEN_ROUTER_PROMPT_VERSION`) |
+| Router prompt | `router_system_v2`, version `0fb9c7853868` (`FROZEN_ROUTER_PROMPT_VERSION`) |
 | Checkpoint expiry | None. It stays available. |
 
 The checkpoint only works with the prompt it was trained on. At startup, compare `router_prompt_version()` with `FROZEN_ROUTER_PROMPT_VERSION` and refuse to start in live mode if they differ.
 
 Set `TINKER_API_KEY` and `TINKER_MODEL_PATH` in `api/.env` locally and in Render's environment for production. Never commit them.
 
-Results on the sealed test set (32 questions, details in [training/runs/REPORT.md](../training/runs/REPORT.md)):
+**The key must belong to the Tinker account that trained the checkpoint.** A checkpoint can only be loaded by its own account; another account's key gets "Weights not found". v2.1 was trained on a second team account, so use that account's key. After changing `api/.env`, restart the API: a running server keeps the values it read at startup.
 
-| | Base | Fine-tuned |
+Results on the v2 sealed test set (110 questions, details in [training/runs/sft-v2.1/EVALUATION.md](../training/runs/sft-v2.1/EVALUATION.md)):
+
+| | Base | Fine-tuned v2.1 |
 |---|---|---|
-| Routing | 30/32 | 32/32 |
-| AI answers within target length | 55% | 82% |
-| Content-rule problems | 5 | 1 |
+| Routing | 103/110 | 110/110 |
+| Outdoor step shown when none was needed | 9 of 41 | 1 of 41 |
+| AI answers within target length | 85% | 100% |
 
-The test set is small, so treat the routing gain as two questions, not as "100% accurate".
+On a fresh 32-question place check, 0 of 28 SEARCH queries add a place the user never gave (v2: 18 of 27). The test sets are small, so treat the routing result as "no errors on these questions", not as "100% accurate".
 
 ## 2. What changed in the contract since PR #7 started
 
@@ -87,10 +89,10 @@ Run these in order. Each one must pass before the next.
 | Lint | `make lint` | Types and style |
 | Prompt parity | `make test-live` (needs a Tinker key in `training/.env`) | The contract's prompt rendering matches what the model was trained on, token for token |
 | Health | `make dev-api`, then `make health` | `model_configured: true` once both Tinker env vars are set |
-| Golden check | Send each question in `training/runs/sft-v1/golden/input.jsonl` to `POST /api/route` | See below |
+| Golden check | Send each question in `training/runs/sft-v2.1/golden/input.jsonl` to `POST /api/route` | See below |
 | Phone check | `make dev`, open the app at 390 px width | One result per question, no mock label, honest errors |
 
-**Golden check.** `training/runs/sft-v1/golden/raw_outputs.jsonl` holds the fine-tuned router's real replies to the AGENTS.md reference cases R01–R18 and R24 (never the sealed set). At temperature 0 the live backend should return the **same route** for each one, and usually the same text. A different route means the prompt, renderer or input cleanup doesn't match training. Check the prompt version first.
+**Golden check.** `training/runs/sft-v2.1/golden/raw_outputs.jsonl` holds the fine-tuned router's real replies to the AGENTS.md reference cases R01–R18 and R24 (never the sealed set). At temperature 0 the live backend should return the **same route** for each one, and usually the same text. A different route means the prompt, renderer or input cleanup doesn't match training. Check the prompt version first.
 
 The golden run got 18 of 19 as expected. **R01 is a known model error:** "I want to join a casual game at the campus court. How should I ask?" should be AI (generic etiquette) but the router returns HUMAN. Match the recorded reply, and don't patch it with a rule.
 
@@ -99,6 +101,6 @@ These golden questions skip the guard check. In the full pipeline, R06, R17, R18
 ## 6. Known limitations
 
 - **R01**: the boundary between "how to ask" (AI) and "local norms" (HUMAN) isn't perfect.
-- **Vague questions**: when the question has no name or place, the router can write a placeholder query, as R24 did (`[event name] confirmed happening today`). The guard check should stop these first.
-- **General questions**: the outdoor action can be weak for questions with nothing to do outside, as R17 shows ("look for its official result online").
-- **One sealed failure**: one HUMAN question still says "right now" (s029), which implies someone is present.
+- **Vague questions**: when the question names no event or place, the query stays vague, as R24 does (`event name official listing today`). The guard check should stop these first.
+- **Stable facts sometimes go to SEARCH**: "Who wrote the Indian national anthem?" and "What is a stupa?" are searched rather than answered. Safe, but slower.
+- **"How do I … at a specific place"** questions lean to AI (booking the cricket nets at a sports complex, a beach camping permit), as in v2.

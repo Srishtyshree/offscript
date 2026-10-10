@@ -269,12 +269,21 @@ def test_ordinary_angle_brackets_are_kept():
 
 
 def test_router_prompt_is_frozen():
-    from offscript_contract.router import FROZEN_ROUTER_PROMPT_VERSION
+    from offscript_contract.router import (
+        FROZEN_ROUTER_PROMPT_V1_VERSION,
+        FROZEN_ROUTER_PROMPT_V2_VERSION,
+        FROZEN_ROUTER_PROMPT_VERSION,
+        ROUTER_PROMPT_V1,
+        ROUTER_PROMPT_V2,
+    )
 
-    assert router_prompt_version() == FROZEN_ROUTER_PROMPT_VERSION, (
-        "The router prompt is frozen: the baseline and the fine-tuned checkpoint were made with "
-        "it. Changing it means re-running the baseline and the training, then updating "
-        "FROZEN_ROUTER_PROMPT_VERSION."
+    # Each checkpoint is only valid with the prompt it was trained on. Changing a prompt means
+    # re-running its baseline and training, then updating its frozen version.
+    assert router_prompt_version(ROUTER_PROMPT_V1) == FROZEN_ROUTER_PROMPT_V1_VERSION
+    assert router_prompt_version(ROUTER_PROMPT_V2) == FROZEN_ROUTER_PROMPT_V2_VERSION
+    # The live app uses v2, matching the v2 checkpoint.
+    assert (
+        router_prompt_version() == FROZEN_ROUTER_PROMPT_VERSION == FROZEN_ROUTER_PROMPT_V2_VERSION
     )
 
 
@@ -295,7 +304,7 @@ def test_v2_prompt_examples_cover_steps_and_nulls_and_version_is_frozen():
     assert {reply.route for reply in replies if reply.outdoor_action is None} == set(Route)
     assert any(reply.outdoor_action for reply in replies)
     assert router_prompt_version(ROUTER_PROMPT_V2) == FROZEN_ROUTER_PROMPT_V2_VERSION
-    # The live app keeps the v1 prompt until the v2 checkpoint ships.
-    assert ROUTER_PROMPT == "router_system"
+    # The live app uses the v2 prompt, matching the v2 checkpoint.
+    assert ROUTER_PROMPT == ROUTER_PROMPT_V2
     messages = build_router_messages("Why is ice slippery?", None, prompt=ROUTER_PROMPT_V2)
     assert messages[0]["content"] == load_system_prompt(ROUTER_PROMPT_V2)

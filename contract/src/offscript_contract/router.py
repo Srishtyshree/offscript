@@ -193,11 +193,12 @@ def prompt_version(name: str) -> str:
     return sha256(load_prompt(name).encode("utf-8")).hexdigest()[:12]
 
 
-# The prompt the live app uses; it must match the deployed checkpoint (v1).
-ROUTER_PROMPT = "router_system"
-# The v2 prompt (optional outdoor step), used by v2 training and evaluation. It becomes
-# ROUTER_PROMPT in the same release that points TINKER_MODEL_PATH at the v2 checkpoint.
+# v1 prompt: always an outdoor step. Kept so the v1 checkpoint can still be trained and evaluated.
+ROUTER_PROMPT_V1 = "router_system"
+# v2 prompt: optional outdoor step, niche cultural facts to SEARCH.
 ROUTER_PROMPT_V2 = "router_system_v2"
+# The prompt the live app uses. It must match the checkpoint in TINKER_MODEL_PATH (v2.1, step 30).
+ROUTER_PROMPT = ROUTER_PROMPT_V2
 
 
 def load_system_prompt(name: str = ROUTER_PROMPT) -> str:
@@ -208,10 +209,12 @@ def router_prompt_version(name: str = ROUTER_PROMPT) -> str:
     return prompt_version(name)
 
 
-# Frozen before the baseline run: the baseline, the training data and the tuned checkpoint all
-# use this exact prompt. Changing it means re-running the baseline and the fine-tuning.
-FROZEN_ROUTER_PROMPT_VERSION = "e018ffbee7cc"
+# Each prompt is frozen before its baseline run: the baseline, the training data and the tuned
+# checkpoint all use that exact text. Changing one means re-running its baseline and training.
+FROZEN_ROUTER_PROMPT_V1_VERSION = "e018ffbee7cc"
 FROZEN_ROUTER_PROMPT_V2_VERSION = "0fb9c7853868"
+# The live prompt's version; the API refuses to start if the prompt file doesn't match it.
+FROZEN_ROUTER_PROMPT_VERSION = FROZEN_ROUTER_PROMPT_V2_VERSION
 
 
 def build_router_messages(

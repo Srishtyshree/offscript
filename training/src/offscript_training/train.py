@@ -25,7 +25,7 @@ from tinker_cookbook.supervised.types import ChatDatasetBuilderCommonConfig
 from offscript_contract.router import (
     BASE_MODEL,
     RENDERER_NAME,
-    ROUTER_PROMPT,
+    ROUTER_PROMPT_V1,
     ROUTER_PROMPT_V2,
     router_prompt_version,
 )
@@ -40,7 +40,7 @@ from offscript_training.data import (
 )
 
 RUNS = Path("training/runs")
-DATASETS = {"v1": (TRAIN_FILE, ROUTER_PROMPT), "v2": (V2_TRAIN_FILE, ROUTER_PROMPT_V2)}
+DATASETS = {"v1": (TRAIN_FILE, ROUTER_PROMPT_V1), "v2": (V2_TRAIN_FILE, ROUTER_PROMPT_V2)}
 DEFAULTS = {
     "lora_rank": 32,
     "learning_rate": round(hyperparam_utils.get_lr(BASE_MODEL), 6),

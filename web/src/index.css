@@ -1629,6 +1629,35 @@ h4 {
   margin-top: 6px;
 }
 
+/* Source links: light sky blue on the dark card (browser default blue is unreadable here) */
+.source-item {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: #7dd3fc;
+  font-size: 16px;
+  line-height: 1.4;
+  text-decoration: underline;
+  text-decoration-color: rgba(125, 211, 252, 0.4);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.source-item:visited {
+  color: #a5b4fc;
+}
+
+.source-item:hover {
+  color: #bae6fd;
+  text-decoration-color: currentColor;
+}
+
+.source-item:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* Actions Row: Refined, non-competing buttons */
 .inline-answer-actions {
   display: flex;
