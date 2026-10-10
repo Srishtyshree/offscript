@@ -1,0 +1,71 @@
+{
+  "model": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012",
+  "data": "training/runs/sft-v1/golden/input.jsonl",
+  "router_prompt_version": "e018ffbee7cc",
+  "sampling": {
+    "temperature": 0.0,
+    "max_tokens": 350
+  },
+  "evaluated_at": "2026-10-10T04:28:21+00:00",
+  "all": {
+    "questions": 19,
+    "accuracy": 0.947,
+    "correct": 18,
+    "confusion": {
+      "AI": {
+        "HUMAN": 1,
+        "AI": 5
+      },
+      "SEARCH": {
+        "SEARCH": 8
+      },
+      "HUMAN": {
+        "HUMAN": 5
+      }
+    },
+    "human_precision": 0.833,
+    "human_recall": 1.0,
+    "inappropriate_human_referrals": 1,
+    "inappropriate_human_ids": [
+      "R01"
+    ],
+    "invalid_outputs": 0,
+    "invalid_rate": 0.0,
+    "invalid_codes": {}
+  },
+  "by_kind": {
+    "outdoor": {
+      "questions": 19,
+      "accuracy": 0.947,
+      "correct": 18,
+      "confusion": {
+        "AI": {
+          "HUMAN": 1,
+          "AI": 5
+        },
+        "SEARCH": {
+          "SEARCH": 8
+        },
+        "HUMAN": {
+          "HUMAN": 5
+        }
+      },
+      "human_precision": 0.833,
+      "human_recall": 1.0,
+      "inappropriate_human_referrals": 1,
+      "inappropriate_human_ids": [
+        "R01"
+      ],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    }
+  },
+  "content": {
+    "valid_replies": 19,
+    "ai_answer_words_avg": 40.6,
+    "ai_answers_within_target": 1.0,
+    "human_questions_within_target": 1.0,
+    "content_rule_problems": {}
+  }
+}

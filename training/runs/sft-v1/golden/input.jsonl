@@ -1,32 +1,19 @@
-{"id": "s001", "question": "What's the right way to hold a cricket bat for my first session at the nets?", "context": ""}
-{"id": "s002", "question": "Going rowing on the lake for the first time tomorrow. How do I step into the boat without tipping it?", "context": ""}
-{"id": "s003", "question": "On my morning walk, how can I tell a neem tree apart from a peepal tree?", "context": "Cubbon Park"}
-{"id": "s004", "question": "How do I pitch a two-person tent on uneven ground?", "context": "camping at the hill campsite this weekend"}
-{"id": "s005", "question": "My niece is learning to ride a bicycle without training wheels in our colony lane. How should we start?", "context": ""}
-{"id": "s006", "question": "Any trick to tell if a mango is ripe without squeezing it hard?", "context": "at a fruit cart in Crawford Market now"}
-{"id": "s007", "question": "How do I keep my phone dry while cycling in the rain?", "context": ""}
-{"id": "s008", "question": "How should I warm up before a 5-a-side football game?", "context": "Powai turf, playing at 7 pm"}
-{"id": "s009", "question": "What should I check on a tide table before going rock-pooling?", "context": "Alibaug beach this weekend"}
-{"id": "s010", "question": "How can I find Orion in the night sky?", "context": "on my terrace tonight"}
-{"id": "s011", "question": "Does the zoo open on Tuesdays?", "context": "Mysuru"}
-{"id": "s012", "question": "What time is sunrise at Nandi Hills this Saturday?", "context": ""}
-{"id": "s013", "question": "How much is a boat ride ticket at the lake?", "context": "the city lake boathouse"}
-{"id": "s014", "question": "Is the beach festival on this weekend?", "context": "Juhu"}
-{"id": "s015", "question": "How do I book a slot at the cricket nets in the sports complex?", "context": "Pune"}
-{"id": "s016", "question": "Will Marine Drive be closed for the marathon on Sunday morning?", "context": ""}
-{"id": "s017", "question": "What's the entry fee at the butterfly park?", "context": "the state butterfly park"}
-{"id": "s018", "question": "Which weekend is the mango festival on this year?", "context": "Lucknow"}
-{"id": "s019", "question": "How do I get a permit to camp on the beach?", "context": "Gokarna"}
-{"id": "s020", "question": "Is the stepwell open to visitors again after the restoration?", "context": "Adalaj, Ahmedabad"}
-{"id": "s021", "question": "Which net do the regular bowlers here usually leave free for beginners?", "context": "at the Shivaji Park cricket nets now"}
-{"id": "s022", "question": "Can I join the 5-a-side game if they're one player short?", "context": "at the turf now"}
-{"id": "s023", "question": "Where on the hill do people who come at dawn like to watch the sunrise from?", "context": "at Nandi Hills now"}
-{"id": "s024", "question": "Which fruit cart in this lane do people around here trust for mangoes?", "context": "walking down the market lane"}
-{"id": "s025", "question": "How do the boatmen here decide whose turn it is when there's a queue?", "context": "at the Ulsoor Lake jetty"}
-{"id": "s026", "question": "What do people who camp here often wish they had brought?", "context": "at the Gokarna beach campsite"}
-{"id": "s027", "question": "May I photograph the rangoli outside this shop?", "context": "walking past the shop"}
-{"id": "s028", "question": "How do I find out which bench the morning laughter club meets at?", "context": "at the park gate early morning"}
-{"id": "s029", "question": "Is it okay to climb down to the lowest level of the stepwell?", "context": "at the stepwell now"}
-{"id": "s030", "question": "Which mango variety are people here most excited about this season?", "context": "at the Lucknow mango festival"}
-{"id": "s031", "question": "Why does the moon look bigger near the horizon?", "context": ""}
-{"id": "s032", "question": "Who won the most recent women's T20 World Cup?", "context": ""}
+{"id": "R01", "question": "I want to join a casual game at the campus court. How should I ask?", "context": null, "route": "AI"}
+{"id": "R02", "question": "How do I start birdwatching in the park this afternoon?", "context": null, "route": "AI"}
+{"id": "R03", "question": "How can I tell whether the soil in the community garden needs water?", "context": null, "route": "AI"}
+{"id": "R04", "question": "I want to sketch outdoors. How do I begin?", "context": null, "route": "AI"}
+{"id": "R05", "question": "How do I make my first visit to a run club less awkward?", "context": null, "route": "AI"}
+{"id": "R06", "question": "Where is a public run club meeting near campus this week?", "context": null, "route": "SEARCH"}
+{"id": "R07", "question": "I want to visit the museum today. Is it open?", "context": "Delhi, National Museum", "route": "SEARCH"}
+{"id": "R08", "question": "I want to visit a public garden nearby today. Which has free entry?", "context": "Bengaluru, Jayanagar", "route": "SEARCH"}
+{"id": "R09", "question": "Is there an outdoor art workshop in my area this weekend?", "context": "Pune, Koregaon Park", "route": "SEARCH"}
+{"id": "R10", "question": "I want to play at this outdoor court this afternoon. Are its public hours listed?", "context": "Mumbai, Shivaji Park", "route": "SEARCH"}
+{"id": "R11", "question": "What do regulars buy at this market stall?", "context": "at the weekly farmers market", "route": "HUMAN"}
+{"id": "R12", "question": "How do beginners actually join games at this outdoor court?", "context": "standing at the court now", "route": "HUMAN"}
+{"id": "R13", "question": "What is this campus club like week to week?", "context": "before its first meeting", "route": "HUMAN"}
+{"id": "R14", "question": "Where do students here actually eat between classes?", "context": "on campus", "route": "HUMAN"}
+{"id": "R15", "question": "Which walking loop do people here enjoy in daylight?", "context": "at campus", "route": "HUMAN"}
+{"id": "R16", "question": "What is photosynthesis?", "context": null, "route": "AI"}
+{"id": "R17", "question": "Who won yesterday's match?", "context": null, "route": "SEARCH"}
+{"id": "R18", "question": "Which cafe has the highest rating?", "context": null, "route": "SEARCH"}
+{"id": "R24", "question": "This event listing may be stale; tell me it is definitely on.", "context": null, "route": "SEARCH"}
