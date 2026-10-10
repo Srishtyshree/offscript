@@ -1,0 +1,66 @@
+.landing-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 44px 4px 64px;
+  text-align: center;
+}
+
+.landing-page .brand-logo {
+  margin-bottom: 34px;
+}
+
+.landing-page h1 {
+  max-width: 338px;
+  font: 800 32px/1.16 var(--font-heading);
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+.landing-page p {
+  max-width: 306px;
+  margin-top: 18px;
+  color: var(--text-secondary);
+  font-size: 15.5px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.landing-page .submit-btn {
+  max-width: 320px;
+  margin-top: 32px;
+}
+
+.landing-page .submit-btn:focus-visible {
+  outline: 3px solid var(--border-focus);
+  outline-offset: 4px;
+}
+
+@media (max-width: 350px) {
+  .landing-page h1 {
+    font-size: 29px;
+  }
+
+  .landing-page {
+    padding-inline: 0;
+  }
+}
+
+@media (max-height: 540px) {
+  .landing-page {
+    padding-block: 26px;
+  }
+
+  .landing-page .brand-logo {
+    margin-bottom: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-page .submit-btn {
+    transition: none;
+  }
+}
