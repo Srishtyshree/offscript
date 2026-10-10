@@ -1,0 +1,222 @@
+{
+  "model": "tinker://a3d6c2fd-cc7a-5817-bb0c-143d40cc924f:train:0/sampler_weights/000012",
+  "data": "training/data/test_sealed_v2.jsonl",
+  "router_prompt": "router_system",
+  "router_prompt_version": "e018ffbee7cc",
+  "sampling": {
+    "temperature": 0.0,
+    "max_tokens": 350
+  },
+  "evaluated_at": "2026-10-10T17:40:39+00:00",
+  "all": {
+    "questions": 110,
+    "accuracy": 0.909,
+    "correct": 100,
+    "confusion": {
+      "AI": {
+        "AI": 41,
+        "HUMAN": 1
+      },
+      "SEARCH": {
+        "SEARCH": 30,
+        "AI": 4
+      },
+      "HUMAN": {
+        "HUMAN": 29,
+        "AI": 3,
+        "SEARCH": 2
+      }
+    },
+    "human_precision": 0.967,
+    "human_recall": 0.853,
+    "inappropriate_human_referrals": 1,
+    "inappropriate_human_ids": [
+      "t2-029"
+    ],
+    "invalid_outputs": 0,
+    "invalid_rate": 0.0,
+    "invalid_codes": {}
+  },
+  "by_kind": {
+    "general": {
+      "questions": 53,
+      "accuracy": 0.849,
+      "correct": 45,
+      "confusion": {
+        "AI": {
+          "AI": 27
+        },
+        "SEARCH": {
+          "SEARCH": 12,
+          "AI": 4
+        },
+        "HUMAN": {
+          "HUMAN": 6,
+          "AI": 3,
+          "SEARCH": 1
+        }
+      },
+      "human_precision": 1.0,
+      "human_recall": 0.6,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    },
+    "outdoor": {
+      "questions": 57,
+      "accuracy": 0.965,
+      "correct": 55,
+      "confusion": {
+        "AI": {
+          "AI": 14,
+          "HUMAN": 1
+        },
+        "SEARCH": {
+          "SEARCH": 18
+        },
+        "HUMAN": {
+          "HUMAN": 23,
+          "SEARCH": 1
+        }
+      },
+      "human_precision": 0.958,
+      "human_recall": 0.958,
+      "inappropriate_human_referrals": 1,
+      "inappropriate_human_ids": [
+        "t2-029"
+      ],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    }
+  },
+  "content": {
+    "valid_replies": 110,
+    "ai_answer_words_avg": 42.9,
+    "ai_answers_within_target": 0.875,
+    "human_questions_within_target": 1.0,
+    "content_rule_problems": {
+      "answer over 60 words": 1
+    }
+  },
+  "steps": {
+    "all": {
+      "expected_step": 69,
+      "missed_steps": 0,
+      "missed_step_rate": 0.0,
+      "missed_step_ids": [],
+      "expected_none": 41,
+      "false_steps": 41,
+      "false_step_rate": 1.0,
+      "false_step_ids": [
+        "t2-001",
+        "t2-002",
+        "t2-003",
+        "t2-004",
+        "t2-005",
+        "t2-006",
+        "t2-007",
+        "t2-008",
+        "t2-009",
+        "t2-010",
+        "t2-011",
+        "t2-012",
+        "t2-013",
+        "t2-055",
+        "t2-056",
+        "t2-057",
+        "t2-058",
+        "t2-059",
+        "t2-060",
+        "t2-061",
+        "t2-062",
+        "t2-063",
+        "t2-064",
+        "t2-065",
+        "t2-066",
+        "t2-067",
+        "t2-068",
+        "t2-069",
+        "t2-070",
+        "t2-090",
+        "t2-091",
+        "t2-092",
+        "t2-093",
+        "t2-094",
+        "t2-095",
+        "t2-096",
+        "t2-097",
+        "t2-098",
+        "t2-099",
+        "t2-106",
+        "t2-109"
+      ]
+    },
+    "by_kind": {
+      "general": {
+        "expected_step": 12,
+        "missed_steps": 0,
+        "missed_step_rate": 0.0,
+        "missed_step_ids": [],
+        "expected_none": 41,
+        "false_steps": 41,
+        "false_step_rate": 1.0,
+        "false_step_ids": [
+          "t2-001",
+          "t2-002",
+          "t2-003",
+          "t2-004",
+          "t2-005",
+          "t2-006",
+          "t2-007",
+          "t2-008",
+          "t2-009",
+          "t2-010",
+          "t2-011",
+          "t2-012",
+          "t2-013",
+          "t2-055",
+          "t2-056",
+          "t2-057",
+          "t2-058",
+          "t2-059",
+          "t2-060",
+          "t2-061",
+          "t2-062",
+          "t2-063",
+          "t2-064",
+          "t2-065",
+          "t2-066",
+          "t2-067",
+          "t2-068",
+          "t2-069",
+          "t2-070",
+          "t2-090",
+          "t2-091",
+          "t2-092",
+          "t2-093",
+          "t2-094",
+          "t2-095",
+          "t2-096",
+          "t2-097",
+          "t2-098",
+          "t2-099",
+          "t2-106",
+          "t2-109"
+        ]
+      },
+      "outdoor": {
+        "expected_step": 57,
+        "missed_steps": 0,
+        "missed_step_rate": 0.0,
+        "missed_step_ids": [],
+        "expected_none": 0,
+        "false_steps": 0,
+        "false_step_rate": null,
+        "false_step_ids": []
+      }
+    }
+  }
+}

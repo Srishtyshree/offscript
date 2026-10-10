@@ -1,0 +1,116 @@
+{
+  "final_sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/final",
+  "checkpoints": [
+    {
+      "name": "000010",
+      "batch": 10,
+      "epoch": 0,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000010",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000010",
+      "elapsed_tokens": 245324
+    },
+    {
+      "name": "000020",
+      "batch": 20,
+      "epoch": 0,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000020",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000020",
+      "elapsed_tokens": 468482
+    },
+    {
+      "name": "000030",
+      "batch": 30,
+      "epoch": 0,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000030",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000030",
+      "elapsed_tokens": 691877
+    },
+    {
+      "name": "000040",
+      "batch": 40,
+      "epoch": 0,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000040",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000040",
+      "elapsed_tokens": 915204
+    },
+    {
+      "name": "000050",
+      "batch": 50,
+      "epoch": 0,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000050",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000050",
+      "elapsed_tokens": 1138671
+    },
+    {
+      "name": "000060",
+      "batch": 0,
+      "epoch": 1,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000060",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000060",
+      "elapsed_tokens": 1362452
+    },
+    {
+      "name": "000070",
+      "batch": 10,
+      "epoch": 1,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000070",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000070",
+      "elapsed_tokens": 1585746
+    },
+    {
+      "name": "000080",
+      "batch": 20,
+      "epoch": 1,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000080",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000080",
+      "elapsed_tokens": 1809259
+    },
+    {
+      "name": "000090",
+      "batch": 30,
+      "epoch": 1,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000090",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000090",
+      "elapsed_tokens": 2032471
+    },
+    {
+      "name": "000100",
+      "batch": 40,
+      "epoch": 1,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000100",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000100",
+      "elapsed_tokens": 2255829
+    },
+    {
+      "name": "000110",
+      "batch": 50,
+      "epoch": 1,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/000110",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000110",
+      "elapsed_tokens": 2479114
+    },
+    {
+      "name": "final",
+      "batch": 0,
+      "epoch": 2,
+      "state_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/weights/final",
+      "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/final",
+      "elapsed_tokens": 2680174
+    }
+  ],
+  "last_metrics": {
+    "step": 119,
+    "epoch": 1,
+    "progress": 1.0,
+    "learning_rate": 3.941666666666653e-06,
+    "num_sequences": 16,
+    "num_tokens": 22280,
+    "num_loss_tokens": 16.00000019185245,
+    "train_mean_nll": 0.04858773574233055,
+    "train_mean_bpb": 0.017984197874827478,
+    "time/get_batch": 0.07393012499960605,
+    "time/submit_batch": 0.07458433300053002,
+    "time/step": 1.906514916998276,
+    "time/finish_batch": 1.9200113330007298
+  }
+}

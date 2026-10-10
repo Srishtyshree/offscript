@@ -1,0 +1,22 @@
+{
+  "base_model": "Qwen/Qwen3.5-9B",
+  "renderer": "qwen3_5_disable_thinking",
+  "dataset": "v2",
+  "router_prompt": "router_system_v2",
+  "router_prompt_version": "0fb9c7853868",
+  "train_file": "training/data/v2/router_v2.jsonl",
+  "train_rows": 1085,
+  "held_out_rows": 110,
+  "max_steps": null,
+  "lora_rank": 32,
+  "learning_rate": 0.000473,
+  "lr_schedule": "linear",
+  "num_epochs": 2,
+  "batch_size": 16,
+  "validation_rows": 15,
+  "validation_fraction": 0.1,
+  "max_length": 2048,
+  "seed": 0,
+  "eval_every": 10,
+  "save_every": 10
+}

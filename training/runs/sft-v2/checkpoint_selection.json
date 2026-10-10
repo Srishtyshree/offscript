@@ -1,0 +1,19 @@
+{
+  "chosen_checkpoint": "000020",
+  "sampler_path": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000020",
+  "rule": "lowest validation loss among saved checkpoints (step 20: 0.7896); held-out rows are whole scenario families; chosen before any sealed-set evaluation",
+  "validation_nll": {
+    "000010": 0.8374,
+    "000020": 0.7896,
+    "000030": 0.7902,
+    "000040": 0.8559,
+    "000050": 0.8811,
+    "000060": 0.842,
+    "000070": 0.9294,
+    "000080": 0.9655,
+    "000090": 1.0052,
+    "000100": 0.9937,
+    "000110": 1.0157,
+    "final": 1.0157
+  }
+}
