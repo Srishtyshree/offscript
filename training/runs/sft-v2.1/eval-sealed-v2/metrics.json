@@ -1,0 +1,148 @@
+{
+  "model": "tinker://7422f56a-258e-5e14-85ef-aa63b9100926:train:0/sampler_weights/000030",
+  "data": "training/data/test_sealed_v2.jsonl",
+  "router_prompt": "router_system_v2",
+  "router_prompt_version": "0fb9c7853868",
+  "sampling": {
+    "temperature": 0.0,
+    "max_tokens": 350
+  },
+  "evaluated_at": "2026-10-10T18:33:07+00:00",
+  "all": {
+    "questions": 110,
+    "accuracy": 1.0,
+    "correct": 110,
+    "confusion": {
+      "AI": {
+        "AI": 42
+      },
+      "SEARCH": {
+        "SEARCH": 34
+      },
+      "HUMAN": {
+        "HUMAN": 34
+      }
+    },
+    "human_precision": 1.0,
+    "human_recall": 1.0,
+    "inappropriate_human_referrals": 0,
+    "inappropriate_human_ids": [],
+    "invalid_outputs": 0,
+    "invalid_rate": 0.0,
+    "invalid_codes": {}
+  },
+  "by_kind": {
+    "general": {
+      "questions": 53,
+      "accuracy": 1.0,
+      "correct": 53,
+      "confusion": {
+        "AI": {
+          "AI": 27
+        },
+        "SEARCH": {
+          "SEARCH": 16
+        },
+        "HUMAN": {
+          "HUMAN": 10
+        }
+      },
+      "human_precision": 1.0,
+      "human_recall": 1.0,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    },
+    "outdoor": {
+      "questions": 57,
+      "accuracy": 1.0,
+      "correct": 57,
+      "confusion": {
+        "AI": {
+          "AI": 15
+        },
+        "SEARCH": {
+          "SEARCH": 18
+        },
+        "HUMAN": {
+          "HUMAN": 24
+        }
+      },
+      "human_precision": 1.0,
+      "human_recall": 1.0,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    }
+  },
+  "content": {
+    "valid_replies": 110,
+    "ai_answer_words_avg": 35.1,
+    "ai_answers_within_target": 1.0,
+    "human_questions_within_target": 1.0,
+    "content_rule_problems": {}
+  },
+  "steps": {
+    "all": {
+      "expected_step": 69,
+      "missed_steps": 1,
+      "missed_step_rate": 0.014,
+      "missed_step_ids": [
+        "t2-053"
+      ],
+      "expected_none": 41,
+      "false_steps": 1,
+      "false_step_rate": 0.024,
+      "false_step_ids": [
+        "t2-067"
+      ]
+    },
+    "by_kind": {
+      "general": {
+        "expected_step": 12,
+        "missed_steps": 0,
+        "missed_step_rate": 0.0,
+        "missed_step_ids": [],
+        "expected_none": 41,
+        "false_steps": 1,
+        "false_step_rate": 0.024,
+        "false_step_ids": [
+          "t2-067"
+        ]
+      },
+      "outdoor": {
+        "expected_step": 57,
+        "missed_steps": 1,
+        "missed_step_rate": 0.018,
+        "missed_step_ids": [
+          "t2-053"
+        ],
+        "expected_none": 0,
+        "false_steps": 0,
+        "false_step_rate": null,
+        "false_step_ids": []
+      }
+    }
+  },
+  "queries": {
+    "search_replies": 34,
+    "queries_adding_names": 3,
+    "adding_rate": 0.088,
+    "added_names": {
+      "t2-039": [
+        "Monday"
+      ],
+      "t2-042": [
+        "Sunday"
+      ],
+      "t2-063": [
+        "USD",
+        "INR"
+      ]
+    }
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "model": "tinker://7f081b71-18f9-575a-bed7-6c8466e410fe:train:0/sampler_weights/000020",
+  "data": "training/data/check_places_v2.jsonl",
+  "router_prompt": "router_system_v2",
+  "router_prompt_version": "0fb9c7853868",
+  "sampling": {
+    "temperature": 0.0,
+    "max_tokens": 350
+  },
+  "evaluated_at": "2026-10-10T18:11:33+00:00",
+  "all": {
+    "questions": 32,
+    "accuracy": 1.0,
+    "correct": 32,
+    "confusion": {
+      "AI": {
+        "AI": 2
+      },
+      "SEARCH": {
+        "SEARCH": 27
+      },
+      "HUMAN": {
+        "HUMAN": 3
+      }
+    },
+    "human_precision": 1.0,
+    "human_recall": 1.0,
+    "inappropriate_human_referrals": 0,
+    "inappropriate_human_ids": [],
+    "invalid_outputs": 0,
+    "invalid_rate": 0.0,
+    "invalid_codes": {}
+  },
+  "by_kind": {
+    "general": {
+      "questions": 10,
+      "accuracy": 1.0,
+      "correct": 10,
+      "confusion": {
+        "AI": {
+          "AI": 2
+        },
+        "SEARCH": {
+          "SEARCH": 8
+        },
+        "HUMAN": {}
+      },
+      "human_precision": null,
+      "human_recall": null,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    },
+    "outdoor": {
+      "questions": 22,
+      "accuracy": 1.0,
+      "correct": 22,
+      "confusion": {
+        "AI": {},
+        "SEARCH": {
+          "SEARCH": 19
+        },
+        "HUMAN": {
+          "HUMAN": 3
+        }
+      },
+      "human_precision": 1.0,
+      "human_recall": 1.0,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    }
+  },
+  "content": {
+    "valid_replies": 32,
+    "ai_answer_words_avg": 43.5,
+    "ai_answers_within_target": 1.0,
+    "human_questions_within_target": 1.0,
+    "content_rule_problems": {}
+  },
+  "steps": {
+    "all": {
+      "expected_step": 22,
+      "missed_steps": 0,
+      "missed_step_rate": 0.0,
+      "missed_step_ids": [],
+      "expected_none": 10,
+      "false_steps": 1,
+      "false_step_rate": 0.1,
+      "false_step_ids": [
+        "p-028"
+      ]
+    },
+    "by_kind": {
+      "general": {
+        "expected_step": 0,
+        "missed_steps": 0,
+        "missed_step_rate": null,
+        "missed_step_ids": [],
+        "expected_none": 10,
+        "false_steps": 1,
+        "false_step_rate": 0.1,
+        "false_step_ids": [
+          "p-028"
+        ]
+      },
+      "outdoor": {
+        "expected_step": 22,
+        "missed_steps": 0,
+        "missed_step_rate": 0.0,
+        "missed_step_ids": [],
+        "expected_none": 0,
+        "false_steps": 0,
+        "false_step_rate": null,
+        "false_step_ids": []
+      }
+    }
+  },
+  "queries": {
+    "search_replies": 27,
+    "queries_adding_names": 18,
+    "adding_rate": 0.667,
+    "added_names": {
+      "p-001": [
+        "Kolkata"
+      ],
+      "p-002": [
+        "Zakir",
+        "Hussain",
+        "Rose",
+        "Garden"
+      ],
+      "p-003": [
+        "Zakir",
+        "Hussain",
+        "Delhi"
+      ],
+      "p-004": [
+        "Hyderabad"
+      ],
+      "p-005": [
+        "Hyderabad"
+      ],
+      "p-006": [
+        "Village"
+      ],
+      "p-007": [
+        "Delhi"
+      ],
+      "p-009": [
+        "Stupa"
+      ],
+      "p-010": [
+        "Lucknow"
+      ],
+      "p-014": [
+        "Pune"
+      ],
+      "p-015": [
+        "Hyderabad"
+      ],
+      "p-016": [
+        "Varanasi"
+      ],
+      "p-018": [
+        "Government",
+        "Bengaluru"
+      ],
+      "p-019": [
+        "Art",
+        "Zanzibar"
+      ],
+      "p-020": [
+        "Delhi"
+      ],
+      "p-021": [
+        "Bengaluru"
+      ],
+      "p-022": [
+        "Maharashtra",
+        "Public",
+        "Service",
+        "Commission"
+      ],
+      "p-027": [
+        "Delhi",
+        "University"
+      ]
+    }
+  }
+}

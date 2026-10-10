@@ -54,9 +54,10 @@ baseline-v2: ## Untuned model with the v2 prompt on both sealed sets → trainin
 train-v2: ## LoRA fine-tune on the v2 data (family split) → training/runs/$(RUN) (costs a few dollars)
 	$(TRAIN_ENV).train --name $(RUN) --dataset v2 --num-epochs 2 --eval-every 10 --save-every 10
 
-evaluate-v2: ## Tuned v2 model on both sealed sets (MODEL_PATH=tinker://...) → training/runs/$(RUN)/eval-*
+evaluate-v2: ## Tuned v2 model on both sealed sets and the place check (MODEL_PATH=tinker://...) → training/runs/$(RUN)/eval-*
 	$(TRAIN_ENV).evaluate --model-path $(MODEL_PATH) --prompt v2 --data training/data/test_sealed_v2.jsonl --out training/runs/$(RUN)/eval-sealed-v2
 	$(TRAIN_ENV).evaluate --model-path $(MODEL_PATH) --prompt v2 --data training/data/test_sealed.jsonl --out training/runs/$(RUN)/eval-sealed-v1
+	$(TRAIN_ENV).evaluate --model-path $(MODEL_PATH) --prompt v2 --data training/data/check_places_v2.jsonl --out training/runs/$(RUN)/eval-places
 
 report-v2: ## Base vs tuned v2 on the v2 sealed set → training/runs/REPORT_V2.md
 	uv run python -m offscript_training.report training/runs/baseline-v2/sealed-v2 training/runs/$(RUN)/eval-sealed-v2 > training/runs/REPORT_V2.md

@@ -1,5 +1,6 @@
 """Apply the Phase 3 review to the v2 draft: specific reasons, natural contexts, varied prefixes,
-Hinglish casing, near-copy rewording, and new general families that keep a real step.
+Hinglish casing, near-copy rewording, new general families that keep a real step, and (v2.1)
+search queries that use only the places and names each row gives.
 
 Reads training/data/v2/router_draft.jsonl + router_metadata.jsonl (unchanged) and writes
 training/data/v2/router_v2.jsonl + router_v2_metadata.jsonl.
@@ -13,6 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from new_families import NEW_FAMILIES  # noqa: E402
+from queries import QUERY_FIXES, ROW_QUERIES, faithful_query  # noqa: E402
 from reasons import REASONS  # noqa: E402
 
 D = Path("training/data/v2")
@@ -146,6 +148,9 @@ for seed in order:
             row["question"] = REWORD[row["id"]]
         if row["id"] == "v2-0735":  # second Hinglish wording of the tea-stall family
             row["question"] = "Batao na, is tea stall par pehli baar kaunsi chai try karun?"
+        if row["route"] == "SEARCH":
+            query = ROW_QUERIES.get(row["id"], QUERY_FIXES.get(seed, row["search_query"]))
+            row["search_query"] = faithful_query(query, row["question"], row.get("context", ""))
         m["review_status"] = "reviewed_ai_assisted"
         out_rows.append(row)
         out_meta.append(m)
@@ -167,7 +172,8 @@ for offset, family in enumerate(NEW_FAMILIES):
         if family["route"] == "AI":
             row["answer"] = family["answer"]
         else:
-            row["search_query"] = family["search_query"]
+            query = QUERY_FIXES.get(seed, family["search_query"])
+            row["search_query"] = faithful_query(query, question, context)
         row["outdoor_action"] = family["outdoor_action"]
         out_rows.append(row)
         out_meta.append(

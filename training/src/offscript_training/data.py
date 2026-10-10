@@ -13,6 +13,7 @@ from pathlib import Path
 
 from offscript_contract.dataset import LabelledExample, SealedExample, validate_dataset
 from offscript_contract.router import ROUTER_PROMPT, build_router_messages
+from offscript_training.metrics import added_names
 
 TRAIN_FILE = Path("training/data/train.jsonl")
 SEALED_FILE = Path("training/data/test_sealed.jsonl")
@@ -108,6 +109,8 @@ def check_v2() -> list[str]:
         expects_step = metadata.get(e.id, {}).get("action") == "step"
         if e.id in metadata and expects_step != (e.outdoor_action is not None):
             problems.append(f"{e.id}: metadata action does not match outdoor_action")
+        if e.route == "SEARCH" and (names := added_names(e.search_query, e.question, e.context)):
+            problems.append(f"{e.id}: search_query adds {' '.join(names)} (not in the question)")
     if any(e.expects_action is None for e in sealed.examples):
         problems.append("every sealed v2 row needs expects_action")
     rows = lambda report: [e.model_dump() for e in report.examples]  # noqa: E731

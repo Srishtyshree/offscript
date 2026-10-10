@@ -33,9 +33,17 @@
 | Format (`python -m offscript_contract.dataset`) | 1,085 valid rows: 417 AI, 340 SEARCH, 328 HUMAN |
 | Steps | 686 with a step, 399 `null`. Outdoor rows: 0 of 596 `null`. General rows: 90 of 489 keep a step (was 35 of 434) |
 | Same question and context twice | 0 |
-| Every family has one shared target | Yes (context pairs excepted by design) |
+| Every family has one shared target | Yes (context pairs excepted by design); since v2.1 a SEARCH query drops names a shorter wording does not give |
 | Near-copies (≥ 0.8 similarity) of the sealed, regression, golden, probe and guard sets | 0 |
 | Keyword-shortcut test | 59% (target under 60%) |
+
+## v2.1: search queries use only what the row gives
+
+The v2 checkpoint learned to add places and names the user never gave ("Lodhi Garden Delhi … official", "Zakir Hussain Rose Garden" for a rose garden in Chandigarh), because 92 of the 340 SEARCH rows did so. On a fresh named-place check (`training/data/check_places_v2.jsonl`, 32 questions) v2 added one in 18 of 27 SEARCH queries; v1 in 2.
+
+- Each family now has one keyword query (`scripts/router_v2_review/queries.py`), with no added city or official name, and no filler (`official`, `organizer`, `listing`, `reliable source`) unless the question uses the word.
+- Per row, any capitalised word the row's question or context does not contain is dropped, so "national museum closing today" searches without "Delhi".
+- `make check-data-v2` now fails on any SEARCH row whose query adds a name (old data: 92 problems; now 0). Evaluation reports the same count for model output.
 
 ## Caveats
 

@@ -1,0 +1,15 @@
+{
+  "chosen_checkpoint": "000030",
+  "sampler_path": "tinker://7422f56a-258e-5e14-85ef-aa63b9100926:train:0/sampler_weights/000030",
+  "rule": "lowest validation loss among saved checkpoints (step 30: 0.7629); held-out rows are whole scenario families; chosen before any sealed-set evaluation",
+  "validation_nll": {
+    "000005": 0.8593,
+    "000010": 0.8081,
+    "000015": 0.7767,
+    "000020": 0.7798,
+    "000025": 0.7892,
+    "000030": 0.7629,
+    "000035": 0.7817
+  },
+  "note": "1 epoch planned (60 steps); stopped after step 35 was saved because validation loss had passed its minimum, to save credit. Trained on a second Tinker account after the first ran out of credit during an earlier attempt."
+}
