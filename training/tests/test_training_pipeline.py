@@ -196,6 +196,38 @@ def test_step_metrics_count_missed_and_false_steps():
     assert "steps" not in compute([record("AI", "AI", reply=json.loads(AI))])  # v1 sets
 
 
+def test_query_metric_counts_places_and_names_the_question_never_gave():
+    from offscript_training.metrics import added_names
+
+    assert added_names("Lodhi Garden Delhi opening hours", "Is Lodhi Garden open?") == ["Delhi"]
+    assert added_names("Kho-Kho rules", "kho kho official rules") == []
+    assert added_names("Lalbagh entry today", "Is it open?", "I mean Lalbagh") == []
+
+    def row(id_, query, question):
+        reply = {"route": "SEARCH", "reason": "Live.", "search_query": query,
+                 "outdoor_action": None}  # fmt: skip
+        return {**record("SEARCH", "SEARCH", reply=reply, id_=id_), "question": question,
+                "context": None}  # fmt: skip
+
+    metrics = compute([
+        row("a", "Zakir Hussain Rose Garden fee", "Is the rose garden free?"),
+        row("b", "rose garden fee today", "Is the rose garden free today?"),
+        record("AI", "AI", reply=json.loads(AI)),
+    ])  # fmt: skip
+    assert metrics["queries"] == {
+        "search_replies": 2,
+        "queries_adding_names": 1,
+        "adding_rate": 0.5,
+        "added_names": {"a": ["Zakir", "Hussain"]},
+    }
+    text_metrics = {**metrics, "model": "m", "data": "d", "router_prompt_version": "v",
+                    "sampling": {"temperature": 0.0}}  # fmt: skip
+    assert "| SEARCH queries adding a place or name | 1/2 (50%) | 1/2 (50%) |" in render(
+        text_metrics, text_metrics
+    )
+    assert "queries" not in compute([record("AI", "AI", reply=json.loads(AI))])
+
+
 def test_repo_v2_data_passes_its_check():
     from offscript_training.data import check_v2
 

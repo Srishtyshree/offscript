@@ -79,6 +79,15 @@ def render(base: dict, tuned: dict) -> str:
                 f"{ts['false_steps']}/{ts['expected_none']} ({_pct(ts['false_step_rate'])})",
             ),
         ]
+    if "queries" in base and "queries" in tuned:
+        bq, tq = base["queries"], tuned["queries"]
+        rows.append(
+            (
+                "SEARCH queries adding a place or name",
+                f"{bq['queries_adding_names']}/{bq['search_replies']} ({_pct(bq['adding_rate'])})",
+                f"{tq['queries_adding_names']}/{tq['search_replies']} ({_pct(tq['adding_rate'])})",
+            )
+        )
     if "test_sealed_v2" in tuned["data"]:
         sealed_note = (
             "- The v2 sealed set was written in the same session as the v2 data review, after"

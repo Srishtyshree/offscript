@@ -4,6 +4,7 @@ A record is {"id", "route" (gold), "kind", "predicted" (route or None), "error" 
 "reply" (parsed reply as a dict, or None)}.
 """
 
+import re
 from collections import Counter
 
 from offscript_contract.parsing import word_count
@@ -95,6 +96,35 @@ def steps(records: list[dict]) -> dict | None:
     return {"all": _step_block(scored), "by_kind": by_kind}
 
 
+def _words(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9]+", text.lower()))
+
+
+def added_names(query: str, question: str, context: str = "") -> list[str]:
+    """Capitalised query words (places, names, acronyms) the question and context never gave."""
+    source = _words(f"{question} {context}")
+    return [w for w in query.split() if w[0].isupper() and not _words(w) <= source]
+
+
+def queries(records: list[dict]) -> dict | None:
+    """Whether SEARCH queries stay faithful to the question: a query that adds a place or name
+    the user never gave (a city, a full official name) searches for something else."""
+    scored = [r for r in records if r["reply"] and r["reply"]["route"] == "SEARCH"]
+    if not scored:
+        return None
+    added = {
+        r["id"]: names
+        for r in scored
+        if (names := added_names(r["reply"]["search_query"], r["question"], r["context"] or ""))
+    }
+    return {
+        "search_replies": len(scored),
+        "queries_adding_names": len(added),
+        "adding_rate": _rate(len(added), len(scored)),
+        "added_names": added,
+    }
+
+
 def compute(records: list[dict]) -> dict:
     by_kind = {
         kind: routing([r for r in records if r["kind"] == kind])
@@ -104,4 +134,7 @@ def compute(records: list[dict]) -> dict:
     step_metrics = steps(records)
     if step_metrics is not None:
         result["steps"] = step_metrics
+    query_metrics = queries(records)
+    if query_metrics is not None:
+        result["queries"] = query_metrics
     return result

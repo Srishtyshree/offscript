@@ -1,0 +1,131 @@
+{
+  "model": "tinker://7422f56a-258e-5e14-85ef-aa63b9100926:train:0/sampler_weights/000030",
+  "data": "training/data/check_places_v2.jsonl",
+  "router_prompt": "router_system_v2",
+  "router_prompt_version": "0fb9c7853868",
+  "sampling": {
+    "temperature": 0.0,
+    "max_tokens": 350
+  },
+  "evaluated_at": "2026-10-10T18:33:49+00:00",
+  "all": {
+    "questions": 32,
+    "accuracy": 0.969,
+    "correct": 31,
+    "confusion": {
+      "AI": {
+        "AI": 1,
+        "SEARCH": 1
+      },
+      "SEARCH": {
+        "SEARCH": 27
+      },
+      "HUMAN": {
+        "HUMAN": 3
+      }
+    },
+    "human_precision": 1.0,
+    "human_recall": 1.0,
+    "inappropriate_human_referrals": 0,
+    "inappropriate_human_ids": [],
+    "invalid_outputs": 0,
+    "invalid_rate": 0.0,
+    "invalid_codes": {}
+  },
+  "by_kind": {
+    "general": {
+      "questions": 10,
+      "accuracy": 0.9,
+      "correct": 9,
+      "confusion": {
+        "AI": {
+          "AI": 1,
+          "SEARCH": 1
+        },
+        "SEARCH": {
+          "SEARCH": 8
+        },
+        "HUMAN": {}
+      },
+      "human_precision": null,
+      "human_recall": null,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    },
+    "outdoor": {
+      "questions": 22,
+      "accuracy": 1.0,
+      "correct": 22,
+      "confusion": {
+        "AI": {},
+        "SEARCH": {
+          "SEARCH": 19
+        },
+        "HUMAN": {
+          "HUMAN": 3
+        }
+      },
+      "human_precision": 1.0,
+      "human_recall": 1.0,
+      "inappropriate_human_referrals": 0,
+      "inappropriate_human_ids": [],
+      "invalid_outputs": 0,
+      "invalid_rate": 0.0,
+      "invalid_codes": {}
+    }
+  },
+  "content": {
+    "valid_replies": 32,
+    "ai_answer_words_avg": 35.0,
+    "ai_answers_within_target": 1.0,
+    "human_questions_within_target": 1.0,
+    "content_rule_problems": {}
+  },
+  "steps": {
+    "all": {
+      "expected_step": 22,
+      "missed_steps": 0,
+      "missed_step_rate": 0.0,
+      "missed_step_ids": [],
+      "expected_none": 10,
+      "false_steps": 1,
+      "false_step_rate": 0.1,
+      "false_step_ids": [
+        "p-028"
+      ]
+    },
+    "by_kind": {
+      "general": {
+        "expected_step": 0,
+        "missed_steps": 0,
+        "missed_step_rate": null,
+        "missed_step_ids": [],
+        "expected_none": 10,
+        "false_steps": 1,
+        "false_step_rate": 0.1,
+        "false_step_ids": [
+          "p-028"
+        ]
+      },
+      "outdoor": {
+        "expected_step": 22,
+        "missed_steps": 0,
+        "missed_step_rate": 0.0,
+        "missed_step_ids": [],
+        "expected_none": 0,
+        "false_steps": 0,
+        "false_step_rate": null,
+        "false_step_ids": []
+      }
+    }
+  },
+  "queries": {
+    "search_replies": 28,
+    "queries_adding_names": 0,
+    "adding_rate": 0.0,
+    "added_names": {}
+  }
+}

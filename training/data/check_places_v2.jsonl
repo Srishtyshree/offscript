@@ -1,0 +1,32 @@
+{"id": "p-001", "question": "Is Victoria Memorial open this Sunday?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-002", "question": "What time does Sukhna Lake boating close today?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-003", "question": "Is there an entry fee for the Rock Garden this week?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-004", "question": "charminar entry ticket price", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-005", "question": "Hussain Sagar boat ride aaj chal rahi hai kya?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-006", "question": "Is the Hauz Khas deer park open on Tuesday?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-007", "question": "When does the Sunday book bazaar at Daryaganj start?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-008", "question": "Is the Mandwa ferry running tomorrow morning?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-009", "question": "Are there guided walks at Sanchi this weekend?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-010", "question": "Is Bara Imambara open on Friday?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-011", "question": "Is the toy train to Matheran running today?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-012", "question": "Kal Chilika lake mein boat ride milegi kya?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-013", "question": "Is the Kullu Dussehra procession route announced for this year?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-014", "question": "Is the Shaniwar Wada light show on tonight?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-015", "question": "golconda fort light show timings", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-016", "question": "Is the evening aarti at Dashashwamedh Ghat on schedule tonight?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-017", "question": "Is the road to Tsomgo Lake open today?", "context": "", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-018", "question": "Is it open today?", "context": "I mean the Albert Hall Museum.", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-019", "question": "When does it close this evening?", "context": "I mean the Calico Museum.", "route": "SEARCH", "kind": "outdoor", "expects_action": true}
+{"id": "p-020", "question": "Who is the current vice-chancellor of JNU?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-021", "question": "What is the current BMTC daily pass price?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-022", "question": "When is the next MPSC prelims exam?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-023", "question": "Who won the most recent Durand Cup?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-024", "question": "What is today's gold rate in Madurai?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-025", "question": "Is the IRCTC website down right now?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-026", "question": "Who currently heads ISRO?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-027", "question": "When is the next DU admission list due?", "context": "", "route": "SEARCH", "kind": "general", "expects_action": false}
+{"id": "p-028", "question": "How do I read a ferry timetable?", "context": "", "route": "AI", "kind": "general", "expects_action": false}
+{"id": "p-029", "question": "What is a stupa?", "context": "", "route": "AI", "kind": "general", "expects_action": false}
+{"id": "p-030", "question": "What do regulars at the Daryaganj book bazaar look for first?", "context": "at the bazaar on Sunday", "route": "HUMAN", "kind": "outdoor", "expects_action": true}
+{"id": "p-031", "question": "Which chai stall near Hussain Sagar do locals actually prefer?", "context": "walking around the lake", "route": "HUMAN", "kind": "outdoor", "expects_action": true}
+{"id": "p-032", "question": "What is the Matheran toy train ride actually like with kids?", "context": "planning a family trip", "route": "HUMAN", "kind": "outdoor", "expects_action": true}
