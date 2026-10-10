@@ -203,18 +203,18 @@ def test_reference_cases_r01_to_r24(
     assert resp.status_code == 200, f"Case {case_id} failed with HTTP {resp.status_code}"
     data = resp.json()
 
-    assert (
-        data["kind"] == expected_kind
-    ), f"Case {case_id} expected {expected_kind}, got {data['kind']}"
+    assert data["kind"] == expected_kind, (
+        f"Case {case_id} expected {expected_kind}, got {data['kind']}"
+    )
 
     if expected_kind == "card":
-        assert (
-            data["route"] == expected_route_or_fit
-        ), f"Case {case_id} expected route {expected_route_or_fit}, got {data.get('route')}"
+        assert data["route"] == expected_route_or_fit, (
+            f"Case {case_id} expected route {expected_route_or_fit}, got {data.get('route')}"
+        )
     else:
-        assert (
-            data["fit"] == expected_route_or_fit
-        ), f"Case {case_id} expected fit {expected_route_or_fit}, got {data.get('fit')}"
+        assert data["fit"] == expected_route_or_fit, (
+            f"Case {case_id} expected fit {expected_route_or_fit}, got {data.get('fit')}"
+        )
 
 
 # ═════════════════════════════════════════════════════════════════════
