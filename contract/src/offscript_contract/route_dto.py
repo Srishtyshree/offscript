@@ -29,6 +29,7 @@ class SearchSource(BaseModel):
 
     title: str = Field(..., min_length=1)
     url: str = Field(..., min_length=1)
+    snippet: str = Field(default="")
 
 
 class AiCardContent(BaseModel):
@@ -37,8 +38,7 @@ class AiCardContent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     answer: str = Field(..., description="Concise know-how answer.")
-    only_out_there: str = Field(..., description="What the screen cannot settle.")
-    do_this: str = Field(..., description="One concrete physical step following from goal.")
+    outdoor_action: str = Field(..., description="One concrete step outside.")
 
 
 class SearchCardContent(BaseModel):
@@ -52,8 +52,9 @@ class SearchCardContent(BaseModel):
         description="Grounding search sources.",
     )
     search_url: str = Field(..., description="Search engine query link.")
-    only_out_there: str = Field(..., description="What the screen cannot settle.")
-    do_this: str = Field(..., description="One concrete physical step following from goal.")
+    outdoor_action: str = Field(..., description="One concrete step outside.")
+    summary: str | None = Field(default=None, description="Grounded answer from search results.")
+    local_tip: str | None = Field(default=None, description="Local tacit experience tip.")
 
 
 class HumanCardContent(BaseModel):
@@ -63,8 +64,7 @@ class HumanCardContent(BaseModel):
 
     who_to_ask: str = Field(..., description="Person type to ask in real world.")
     suggested_question: str = Field(..., description="Natural spoken question (under 20 words).")
-    only_out_there: str = Field(..., description="What the screen cannot settle.")
-    do_this: str = Field(..., description="One concrete physical step following from goal.")
+    outdoor_action: str = Field(..., description="One concrete step outside.")
 
 
 class CardResponse(BaseModel):
@@ -79,6 +79,7 @@ class CardResponse(BaseModel):
     content: AiCardContent | SearchCardContent | HumanCardContent
     request_id: str
     latency_ms: int
+    is_mock: bool = False
 
 
 class GuardResponse(BaseModel):
@@ -91,6 +92,8 @@ class GuardResponse(BaseModel):
         Fit.SCOPE_NUDGE,
         Fit.CONTEXT_REQUEST,
         Fit.SPLIT_REQUEST,
+        Fit.NEEDS_DETAIL,
+        Fit.TWO_QUESTIONS,
         "safety_guidance",
         "refusal",
         "search_limitation",
@@ -102,6 +105,7 @@ class GuardResponse(BaseModel):
     search_url: str | None = None
     request_id: str
     latency_ms: int
+    is_mock: bool = False
 
 
 class ErrorDetail(BaseModel):

@@ -15,7 +15,12 @@ _EMERGENCY_KEYWORDS = [
     "suicide",
     "kill myself",
     "self-harm",
+    "hurting myself",
+    "hurt myself",
+    "harm myself",
     "overdose",
+    "fainted",
+    "unconscious",
     "emergency",
     "call 911",
     "call 999",
@@ -49,7 +54,6 @@ _LEGAL_KEYWORDS = [
 _DANGEROUS_ROUTE_KEYWORDS = [
     "dark shortcut",
     "unsafe route",
-    "after dark",
     "abandoned",
     "trespass",
     "break in",
@@ -87,27 +91,21 @@ _INTRUSIVE_KEYWORDS = [
     "private property",
 ]
 
-# Compiled patterns for multi-word matching
-_EMERGENCY_PATTERN = re.compile(
-    "|".join(re.escape(k) for k in _EMERGENCY_KEYWORDS),
-    re.IGNORECASE,
-)
-_MEDICAL_PATTERN = re.compile(
-    "|".join(re.escape(k) for k in _MEDICAL_KEYWORDS),
-    re.IGNORECASE,
-)
-_LEGAL_PATTERN = re.compile(
-    "|".join(re.escape(k) for k in _LEGAL_KEYWORDS),
-    re.IGNORECASE,
-)
-_DANGEROUS_PATTERN = re.compile(
-    "|".join(re.escape(k) for k in _DANGEROUS_ROUTE_KEYWORDS),
-    re.IGNORECASE,
-)
-_INTRUSIVE_PATTERN = re.compile(
-    "|".join(re.escape(k) for k in _INTRUSIVE_KEYWORDS),
-    re.IGNORECASE,
-)
+
+def _compile_keywords(keywords: list[str]) -> re.Pattern:
+    """Compile keywords with word boundaries to avoid false positives (e.g. 'issue'/'sue')."""
+    return re.compile(
+        r"\b(?:" + "|".join(re.escape(k) for k in keywords) + r")\b",
+        re.IGNORECASE,
+    )
+
+
+# Compiled patterns with word boundaries
+_EMERGENCY_PATTERN = _compile_keywords(_EMERGENCY_KEYWORDS)
+_MEDICAL_PATTERN = _compile_keywords(_MEDICAL_KEYWORDS)
+_LEGAL_PATTERN = _compile_keywords(_LEGAL_KEYWORDS)
+_DANGEROUS_PATTERN = _compile_keywords(_DANGEROUS_ROUTE_KEYWORDS)
+_INTRUSIVE_PATTERN = _compile_keywords(_INTRUSIVE_KEYWORDS)
 
 
 # --- Public API ------------------------------------------------------------------

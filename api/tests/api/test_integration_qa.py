@@ -5,22 +5,12 @@ and all reference cases R01 to R24 from AGENTS.md.
 """
 
 import pytest
-from fastapi.testclient import TestClient
 
 from offscript_api.clients.serpapi import SerpApiClient, SerpApiTimeoutError
-from offscript_api.main import create_app
 from offscript_api.routes.route import get_serpapi_client
 from offscript_contract.route_dto import SearchSource
 
-
-@pytest.fixture
-def app():
-    return create_app()
-
-
-@pytest.fixture
-def client(app):
-    return TestClient(app)
+# Uses app and client fixtures from conftest.py
 
 
 # ═════════════════════════════════════════════════════════════════════
@@ -140,36 +130,36 @@ def client(app):
             "R16",
             "What is photosynthesis?",
             None,
-            "guard",
-            "scope_nudge",
+            "card",
+            "AI",
         ),
         (
             "R17",
             "Who won yesterday's match?",
             None,
-            "guard",
-            "scope_nudge",
+            "card",
+            "SEARCH",
         ),
         (
             "R18",
             "Which cafe has the highest rating?",
             None,
-            "guard",
-            "scope_nudge",
+            "card",
+            "SEARCH",
         ),
         (
             "R19",
             "I want to visit a park today. Which is open near me?",
             None,
             "guard",
-            "context_request",
+            "needs_detail",
         ),
         (
             "R20",
             "How do I join a game, and where is one tonight?",
             None,
             "guard",
-            "split_request",
+            "two_questions",
         ),
         (
             "R21",
@@ -213,18 +203,18 @@ def test_reference_cases_r01_to_r24(
     assert resp.status_code == 200, f"Case {case_id} failed with HTTP {resp.status_code}"
     data = resp.json()
 
-    assert data["kind"] == expected_kind, (
-        f"Case {case_id} expected {expected_kind}, got {data['kind']}"
-    )
+    assert (
+        data["kind"] == expected_kind
+    ), f"Case {case_id} expected {expected_kind}, got {data['kind']}"
 
     if expected_kind == "card":
-        assert data["route"] == expected_route_or_fit, (
-            f"Case {case_id} expected route {expected_route_or_fit}, got {data.get('route')}"
-        )
+        assert (
+            data["route"] == expected_route_or_fit
+        ), f"Case {case_id} expected route {expected_route_or_fit}, got {data.get('route')}"
     else:
-        assert data["fit"] == expected_route_or_fit, (
-            f"Case {case_id} expected fit {expected_route_or_fit}, got {data.get('fit')}"
-        )
+        assert (
+            data["fit"] == expected_route_or_fit
+        ), f"Case {case_id} expected fit {expected_route_or_fit}, got {data.get('fit')}"
 
 
 # ═════════════════════════════════════════════════════════════════════

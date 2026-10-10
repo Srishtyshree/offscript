@@ -177,3 +177,21 @@ def test_safe_birdwatching_passes():
         1,
     )
     assert result is None
+
+
+def test_issue_does_not_trigger_sue():
+    result = check_safety(
+        _make_input("How do I fix a mechanical issue with my gear?"),
+        "req_24",
+        1,
+    )
+    assert result is None
+
+
+def test_stargazing_after_dark_passes():
+    result = check_safety(
+        _make_input("Where can I go stargazing after dark?"),
+        "req_25",
+        1,
+    )
+    assert result is None

@@ -3,6 +3,7 @@ import React from 'react'
 interface HeaderProps {
   version?: string
   isModelConfigured?: boolean
+  isMock?: boolean
   onReset?: () => void
   showReset?: boolean
 }
@@ -10,6 +11,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   version = '0.1.0',
   isModelConfigured = false,
+  isMock = false,
   onReset,
   showReset = false,
 }) => {
@@ -31,11 +33,11 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="header-actions">
         <div
           className="health-status-dot"
-          title={isModelConfigured ? 'Model Ready' : 'Local Dev Mode'}
+          title={isMock ? 'Mock Mode' : isModelConfigured ? 'Model Ready' : 'Live'}
         >
           <span className="dot-indicator" />
           <span className="dot-label">
-            {isModelConfigured ? 'Live' : 'Mock'} v{version}
+            {isMock ? 'Mock' : 'Live'} v{version}
           </span>
         </div>
         {showReset && onReset && (

@@ -3,6 +3,8 @@ export type Fit =
   | 'scope_nudge'
   | 'context_request'
   | 'split_request'
+  | 'needs_detail'
+  | 'two_questions'
   | 'safety_guidance'
   | 'refusal'
   | 'search_limitation'
@@ -12,27 +14,27 @@ export type Route = 'AI' | 'SEARCH' | 'HUMAN'
 export interface SearchSource {
   title: string
   url: string
+  snippet?: string
 }
 
 export interface AiContent {
   answer: string
-  only_out_there: string
-  do_this: string
+  outdoor_action: string
 }
 
 export interface SearchContent {
   search_query: string
   sources: SearchSource[]
   search_url: string
-  only_out_there: string
-  do_this: string
+  outdoor_action: string
+  summary?: string | null
+  local_tip?: string | null
 }
 
 export interface HumanContent {
   who_to_ask: string
   suggested_question: string
-  only_out_there: string
-  do_this: string
+  outdoor_action: string
 }
 
 export interface CardResponse {
@@ -43,6 +45,7 @@ export interface CardResponse {
   content: AiContent | SearchContent | HumanContent
   request_id: string
   latency_ms: number
+  is_mock?: boolean
 }
 
 export interface GuardResponse {
@@ -55,6 +58,7 @@ export interface GuardResponse {
   search_url?: string
   request_id: string
   latency_ms: number
+  is_mock?: boolean
 }
 
 export interface ErrorResponse {

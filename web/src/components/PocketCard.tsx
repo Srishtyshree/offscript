@@ -24,8 +24,8 @@ export const PocketCard: React.FC<PocketCardProps> = ({ card, onReturn }) => {
 
       {/* Target Step: Bold & Sun-readable */}
       <div className="pocket-action-card">
-        <div className="pocket-action-title">Target Step</div>
-        <div className="pocket-action-text">{content.do_this}</div>
+        <div className="pocket-action-title">Outdoor Action</div>
+        <div className="pocket-action-text">{content.outdoor_action}</div>
       </div>
 
       {/* Route Specific Pocket Helper */}
@@ -62,12 +62,6 @@ export const PocketCard: React.FC<PocketCardProps> = ({ card, onReturn }) => {
           </div>
         </div>
       )}
-
-      {/* What the screen couldn't settle */}
-      <div className="pocket-details-card pocket-field-check">
-        <div className="block-title">🌐 Only out there</div>
-        <div className="pocket-field-text">{content.only_out_there}</div>
-      </div>
 
       {/* Return to App Action */}
       <div className="pocket-return-section">

@@ -42,8 +42,7 @@ describe('Mobile UX & Accessibility QA (Task A07 & AGENTS.md B7)', () => {
       reason: 'Know-how',
       content: {
         answer: 'Ask politely.',
-        only_out_there: 'Who is there.',
-        do_this: 'Approach the court.',
+        outdoor_action: 'Approach the court.',
       },
       request_id: 'req_card_test',
       latency_ms: 10,

@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,11 +7,22 @@ from fastapi.responses import JSONResponse
 
 from offscript_api.config import get_settings
 from offscript_api.routes import health, route
+from offscript_contract.router import FROZEN_ROUTER_PROMPT_VERSION, router_prompt_version
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Confirm router prompt version matches frozen version
+    version = router_prompt_version()
+    if version != FROZEN_ROUTER_PROMPT_VERSION:
+        msg = f"Router prompt version mismatch: {version} != {FROZEN_ROUTER_PROMPT_VERSION}."
+        raise RuntimeError(f"{msg} Refusing to start.")
+    yield
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="Offscript API")
+    app = FastAPI(title="Offscript API", lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,

@@ -70,6 +70,13 @@ export function App() {
       <Header
         version={health?.version || '0.1.0'}
         isModelConfigured={health?.model_configured ?? false}
+        isMock={
+          state.type === 'card'
+            ? !!state.response.is_mock
+            : state.type === 'guard'
+              ? !!state.response.is_mock
+              : false
+        }
         onReset={handleReset}
         showReset={state.type !== 'idle' && state.type !== 'loading'}
       />

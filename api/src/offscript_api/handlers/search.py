@@ -80,11 +80,11 @@ async def handle_search_route(
                     request_id=request_id,
                     latency_ms=max(1, latency_ms),
                 )
-        except (SerpApiTimeoutError, SerpApiQuotaError, SerpApiError) as err:
+        except (SerpApiTimeoutError, SerpApiQuotaError, SerpApiError):
             # Upstream search issue: return honest search_limitation with prefilled search link
             return GuardResponse(
                 fit="search_limitation",
-                reason=f"Search service limitation: {err}",
+                reason="Search service was unavailable or timed out.",
                 message=(
                     "Public search lookup could not be completed right now. "
                     "Use the search link to check fresh details directly."
@@ -98,12 +98,12 @@ async def handle_search_route(
 
     # When no live search lookup was performed, sources is empty:
     # "do not pretend live lookup occurred" (Task A03 acceptance check)
+    action_text = "Check current schedule or hours using the search action, then head to the venue."
     content = SearchCardContent(
         search_query=search_query,
         sources=sources,
         search_url=search_url,
-        only_out_there="Live real-time venue crowding and weather conditions.",
-        do_this="Check current schedule or hours using the search action, then head to the venue.",
+        outdoor_action=action_text,
     )
 
     return CardResponse(

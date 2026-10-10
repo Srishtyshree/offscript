@@ -13,8 +13,7 @@ describe('ResultCard AI and SEARCH actions (Task A03)', () => {
       reason: 'Stable know-how for joining something.',
       content: {
         answer: 'Wait for a pause between games, approach politely, and ask to join next.',
-        only_out_there: 'Whether a game is currently playing right now.',
-        do_this: 'Walk up to the court side and wait for the game to pause.',
+        outdoor_action: 'Walk up to the court side and wait for the game to pause.',
       },
       request_id: 'req_123',
       latency_ms: 15,
@@ -44,8 +43,7 @@ describe('ResultCard AI and SEARCH actions (Task A03)', () => {
         search_query: 'public run club near campus',
         sources: [],
         search_url: 'https://www.google.com/search?q=public+run+club+near+campus',
-        only_out_there: 'Weather and venue conditions.',
-        do_this: 'Open search link to check schedule, then head to the start point.',
+        outdoor_action: 'Open search link to check schedule, then head to the start point.',
       },
       request_id: 'req_456',
       latency_ms: 22,
@@ -76,8 +74,9 @@ describe('ResultCard AI and SEARCH actions (Task A03)', () => {
         search_query: 'campus museum hours',
         sources: [{ title: 'Campus Museum Hours & Admission', url: 'https://museum.edu/hours' }],
         search_url: 'https://www.google.com/search?q=campus+museum+hours',
-        only_out_there: 'Gallery crowd and temporary exhibition changes.',
-        do_this: 'Head to the main hall entrance during open hours.',
+        outdoor_action: 'Head to the main hall entrance during open hours.',
+        summary: 'According to Campus Museum Hours & Admission, open 10am to 5pm.',
+        local_tip: 'Quietest on weekday mornings.',
       },
       request_id: 'req_789',
       latency_ms: 30,
@@ -93,6 +92,8 @@ describe('ResultCard AI and SEARCH actions (Task A03)', () => {
 
     expect(html).toContain('Campus Museum Hours &amp; Admission')
     expect(html).toContain('https://museum.edu/hours')
+    expect(html).toContain('According to Campus Museum Hours')
+    expect(html).toContain('Quietest on weekday mornings.')
     expect(html).toContain('Open Web Search ↗')
   })
 })

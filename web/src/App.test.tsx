@@ -15,15 +15,28 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
   })
 
   describe('Header component', () => {
-    it('renders Mock label when model_configured is false', () => {
+    it('renders Mock label only when isMock is true', () => {
       const html = renderToString(
         React.createElement(Header, {
           version: '0.1.0',
           isModelConfigured: false,
+          isMock: true,
         }),
       )
       expect(html).toContain('Offscript')
       expect(html).toContain('Mock')
+      expect(html).toContain('0.1.0')
+    })
+
+    it('renders Live label when isMock is false even if model_configured is false', () => {
+      const html = renderToString(
+        React.createElement(Header, {
+          version: '0.1.0',
+          isModelConfigured: false,
+          isMock: false,
+        }),
+      )
+      expect(html).toContain('Live')
       expect(html).toContain('0.1.0')
     })
 
@@ -78,8 +91,7 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
         reason: 'Know-how',
         content: {
           answer: 'Wait for game break and ask.',
-          only_out_there: 'Who is there right now.',
-          do_this: 'Approach court and wait for timeout.',
+          outdoor_action: 'Approach court and wait for timeout.',
         },
         request_id: 'req_1',
         latency_ms: 10,
@@ -106,8 +118,7 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
         content: {
           who_to_ask: 'The court coordinator or regular players',
           suggested_question: 'Do you run a list or just call next?',
-          only_out_there: 'How this group manages pickup.',
-          do_this: 'Walk over between games and ask the coordinator.',
+          outdoor_action: 'Walk over between games and ask the coordinator.',
         },
         request_id: 'req_2',
         latency_ms: 12,

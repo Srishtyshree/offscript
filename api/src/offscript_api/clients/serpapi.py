@@ -47,12 +47,21 @@ class SerpApiClient:
         return bool(self.api_key)
 
     async def _get_client(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
+
+    async def aclose(self) -> None:
+        """Close the underlying HTTP client if opened."""
         if self._client is not None:
-            return self._client
-        return httpx.AsyncClient(timeout=self.timeout)
+            await self._client.aclose()
+            self._client = None
 
     async def search(self, query: str, num_results: int = 3) -> list[SearchSource]:
         """Execute a Google Search query via SerpApi and return organic search sources.
+
+        Reuses a single shared HTTP client session.
+        Extracts title, url, and snippet for each result.
 
         Raises SerpApiNotConfiguredError if api_key is empty.
         Raises SerpApiTimeoutError if timeout occurs.
@@ -68,7 +77,6 @@ class SerpApiClient:
             "api_key": self.api_key,
         }
 
-        should_close = self._client is None
         client = await self._get_client()
 
         try:
@@ -77,9 +85,6 @@ class SerpApiClient:
             raise SerpApiTimeoutError(f"SerpApi query timed out after {self.timeout}s") from err
         except httpx.RequestError as err:
             raise SerpApiError(f"SerpApi network request error: {err}") from err
-        finally:
-            if should_close:
-                await client.aclose()
 
         if response.status_code == 429:
             raise SerpApiQuotaError("SerpApi quota or rate limit exceeded (429).")
@@ -97,7 +102,8 @@ class SerpApiClient:
         for item in organic_results[:num_results]:
             title = (item.get("title") or "").strip()
             link = (item.get("link") or "").strip()
+            snippet = (item.get("snippet") or "").strip()
             if title and link:
-                sources.append(SearchSource(title=title, url=link))
+                sources.append(SearchSource(title=title, url=link, snippet=snippet))
 
         return sources

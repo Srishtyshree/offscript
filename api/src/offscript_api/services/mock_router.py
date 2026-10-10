@@ -91,8 +91,7 @@ def handle_mock_route(
             content=HumanCardContent(
                 who_to_ask="A regular vendor or customer",
                 suggested_question="What do you usually recommend ordering here?",
-                only_out_there="Tacit experience and personal recommendations.",
-                do_this="Step up to the counter and ask the vendor when it's quiet.",
+                outdoor_action="Step up to the counter and ask the vendor when it's quiet.",
             ),
             request_id=req_id,
             latency_ms=max(1, latency),
@@ -111,8 +110,7 @@ def handle_mock_route(
                 search_query=router_input.question,
                 sources=[],
                 search_url=f"https://www.google.com/search?q={encoded_q}",
-                only_out_there="Live real-time venue crowding and weather.",
-                do_this="Head to the location listed in the schedule.",
+                outdoor_action="Head to the location listed in the schedule.",
             ),
             request_id=req_id,
             latency_ms=max(1, latency),
@@ -129,8 +127,7 @@ def handle_mock_route(
                 "Wait for a pause between games, approach politely, and ask if "
                 "you can join the next round."
             ),
-            only_out_there="Whether a game is currently playing right now.",
-            do_this="Walk up to the court side and wait for the current game to pause.",
+            outdoor_action="Walk up to the court side and wait for the current game to pause.",
         ),
         request_id=req_id,
         latency_ms=max(1, latency),

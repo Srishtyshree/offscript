@@ -85,18 +85,47 @@ def test_pipeline_human_route():
     assert data["route"] == "HUMAN"
 
 
-# ── Guard states ────────────────────────────────────────────────────
+# ── Guard states & General questions ───────────────────────────────
 
 
-def test_pipeline_scope_nudge():
+def test_pipeline_general_question_gets_ai_route():
+    """Photosynthesis is general knowledge and receives an AI route (Item 4)."""
     response = client.post(
         "/api/route",
         json={"question": "What is photosynthesis?"},
     )
     assert response.status_code == 200
     data = response.json()
+    assert data["kind"] == "card"
+    assert data["route"] == "AI"
+    assert "answer" in data["content"]
+    assert "outdoor_action" in data["content"]
+
+
+def test_pipeline_guard_needs_detail():
+    response = client.post(
+        "/api/route",
+        json={"question": "I want to visit a park today. Which is open near me?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
     assert data["kind"] == "guard"
-    assert data["fit"] == "scope_nudge"
+    assert data["fit"] == "needs_detail"
+    assert data["route"] is None
+    assert "message" in data
+
+
+def test_pipeline_guard_two_questions():
+    response = client.post(
+        "/api/route",
+        json={"question": "How do I join a game, and where is one tonight?"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["kind"] == "guard"
+    assert data["fit"] == "two_questions"
+    assert data["route"] is None
+    assert "message" in data
 
 
 # ── Input validation ────────────────────────────────────────────────

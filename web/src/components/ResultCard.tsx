@@ -41,6 +41,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ card, onGoOffscript, onD
         <div className={`route-pill ${route}`}>
           <span className="route-pill-icon">{currentRoute.icon}</span>
           <span className="route-pill-text">{currentRoute.label}</span>
+          {card.is_mock && <span className="mock-badge">MOCK</span>}
         </div>
         <div className="card-latency-chip">
           <span>⚡ {card.latency_ms}ms</span>
@@ -74,6 +75,17 @@ export const ResultCard: React.FC<ResultCardProps> = ({ card, onGoOffscript, onD
               <strong>{(content as SearchContent).search_query}</strong>
             </div>
           </div>
+
+          {(content as SearchContent).summary && (
+            <div className="search-summary-container">
+              <div className="search-summary-text">{(content as SearchContent).summary}</div>
+              {(content as SearchContent).local_tip && (
+                <div className="search-local-tip">
+                  💡 <em>{(content as SearchContent).local_tip}</em>
+                </div>
+              )}
+            </div>
+          )}
 
           {(content as SearchContent).sources && (content as SearchContent).sources.length > 0 ? (
             <div className="sources-container">
@@ -130,21 +142,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({ card, onGoOffscript, onD
         </div>
       )}
 
-      {/* Only Out There Block */}
-      <div className="card-block outdoor-block">
-        <div className="block-title">
-          <span className="block-icon">🌐</span> Only out there
-        </div>
-        <div className="outdoor-body">{content.only_out_there}</div>
-      </div>
-
-      {/* Target Physical Step: Hero Card */}
+      {/* Target Physical Step: Outdoor Action */}
       <div className="do-this-block">
         <div className="do-this-header">
-          <span className="do-this-badge">🎯 Physical Mission</span>
+          <span className="do-this-badge">🎯 Outdoor Action</span>
           <span className="do-this-subtitle">Follow your goal</span>
         </div>
-        <div className="do-this-body">{content.do_this}</div>
+        <div className="do-this-body">{content.outdoor_action}</div>
       </div>
 
       {/* Mobile Ergonomic Action Dock */}

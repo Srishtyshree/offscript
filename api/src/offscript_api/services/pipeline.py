@@ -3,157 +3,250 @@
 Pipeline order:
   1. Validate input  (normalize_input — raises InputError → 422 in route.py)
   2. Safety rules    (check_safety — returns guard if hit, model never called)
-  3. Router call     (determines fit, route, reason)
-  4. Fit / guard     (if fit != ok, return guard response)
-  5. Handler         (AI know-how / SEARCH action & SerpApi / HUMAN)
-  6. Card validation (all fields present and within limits)
-  7. Respond         (include request_id and latency_ms)
+  3. Guard check     (base model call — stops missing details or two questions)
+  4. Router call     (fine-tuned model call — determines route, reason, outdoor_action)
+  5. Route handler   (AI know-how / SEARCH action & SerpApi + summary / HUMAN)
+  6. Card validation (Pydantic contract schemas)
+  7. Respond         (includes request_id and latency_ms)
 """
 
+import logging
 import time
+import urllib.parse
 
-from offscript_api.clients.serpapi import SerpApiClient
-from offscript_api.config import Settings
-from offscript_api.handlers.ai import handle_ai_route
-from offscript_api.handlers.human import handle_human_route
-from offscript_api.handlers.search import handle_search_route
-from offscript_api.services.safety import check_safety
-from offscript_contract.route_dto import (
-    GuardResponse,
-    RouteResponseUnion,
+from offscript_api.clients.serpapi import (
+    SerpApiClient,
+    SerpApiError,
+    SerpApiNotConfiguredError,
+    SerpApiQuotaError,
+    SerpApiTimeoutError,
 )
-from offscript_contract.router import Fit, RouterInput
+from offscript_api.services.model_service import (
+    BaseRouteService,
+)
+from offscript_api.services.safety import check_safety
+from offscript_contract.guard import GuardVerdict
+from offscript_contract.route_dto import (
+    AiCardContent,
+    CardResponse,
+    GuardResponse,
+    HumanCardContent,
+    RouteResponseUnion,
+    SearchCardContent,
+)
+from offscript_contract.router import Fit, Route, RouterInput
+from offscript_contract.search_summary import (
+    SearchResult,
+    SummaryStatus,
+    ungrounded_numbers,
+)
+
+logger = logging.getLogger(__name__)
+
+TOTAL_BUDGET_S = 60.0
+
+
+def _build_search_url(query: str) -> str:
+    encoded = urllib.parse.quote_plus(query)
+    return f"https://www.google.com/search?q={encoded}"
 
 
 async def run_pipeline(
     router_input: RouterInput,
     request_id: str,
-    settings: Settings,
+    model_service: BaseRouteService,
     serpapi_client: SerpApiClient | None = None,
 ) -> RouteResponseUnion:
-    """Execute the full route pipeline for a validated input.
-
-    Returns a card (AI/SEARCH/HUMAN) or guard/error response.
-    """
+    """Execute the full route pipeline for a validated input."""
     start_time = time.perf_counter()
 
     def get_latency() -> int:
         return max(1, int((time.perf_counter() - start_time) * 1000))
 
-    # ── Step 2: Safety rules (before model) ──────────────────────────
+    def get_remaining_budget() -> float:
+        elapsed = time.perf_counter() - start_time
+        return max(0.0, TOTAL_BUDGET_S - elapsed)
+
+    # ── Step 2: Safety rules (before model call) ───────────────────────
     safety_result = check_safety(router_input, request_id, get_latency())
     if safety_result is not None:
+        logger.info(
+            "request_id=%s fit=%s latency_ms=%d",
+            request_id,
+            safety_result.fit,
+            get_latency(),
+        )
         return safety_result
 
-    q_lower = router_input.question.lower()
+    # ── Step 3: Guard check (base model, untuned) ──────────────────────
+    guard_output = await model_service.check_guard(
+        router_input.question,
+        router_input.context if router_input.context != "none" else None,
+        get_remaining_budget(),
+    )
 
-    # ── Steps 3 & 4: Router call & Fit check ────────────────────────
-    # Check guard states (scope_nudge, context_request, split_request)
-    if any(k in q_lower for k in ["photosynthesis", "who won", "highest rating", "highest-rated"]):
+    if guard_output.verdict == GuardVerdict.NEEDS_DETAIL:
+        logger.info(
+            "request_id=%s fit=%s latency_ms=%d",
+            request_id,
+            Fit.NEEDS_DETAIL,
+            get_latency(),
+        )
         return GuardResponse(
-            fit=Fit.SCOPE_NUDGE,
-            reason="Trivia or screen-complete request.",
-            message=(
-                "Offscript is for something you want to do or find out out there. "
-                "What are you heading out to try, see, or ask?"
+            fit=Fit.NEEDS_DETAIL,
+            reason="Essential detail is missing.",
+            message=guard_output.message or "Please provide more detail about what you want to do.",
+            request_id=request_id,
+            latency_ms=get_latency(),
+            is_mock=model_service.is_mock,
+        )
+
+    if guard_output.verdict == GuardVerdict.TWO_QUESTIONS:
+        logger.info(
+            "request_id=%s fit=%s latency_ms=%d",
+            request_id,
+            Fit.TWO_QUESTIONS,
+            get_latency(),
+        )
+        return GuardResponse(
+            fit=Fit.TWO_QUESTIONS,
+            reason="Two separate questions asked in one.",
+            message=guard_output.message or "Please ask one question at a time.",
+            request_id=request_id,
+            latency_ms=get_latency(),
+            is_mock=model_service.is_mock,
+        )
+
+    # ── Step 4: Router call (fine-tuned model) ─────────────────────────
+    router_reply = await model_service.route(
+        router_input.question,
+        router_input.context if router_input.context != "none" else None,
+        get_remaining_budget(),
+    )
+
+    # ── Step 5: Route handlers ─────────────────────────────────────────
+    if router_reply.route == Route.AI:
+        card = CardResponse(
+            fit=Fit.OK,
+            route=Route.AI,
+            reason=router_reply.reason,
+            content=AiCardContent(
+                answer=router_reply.answer,
+                outdoor_action=router_reply.outdoor_action,
             ),
             request_id=request_id,
             latency_ms=get_latency(),
+            is_mock=model_service.is_mock,
         )
+        logger.info(
+            "request_id=%s route=%s latency_ms=%d",
+            request_id,
+            Route.AI,
+            get_latency(),
+        )
+        return card
 
-    # Split request: two needs requiring different routes
-    if "and where is" in q_lower or "and when is" in q_lower:
+    if router_reply.route == Route.HUMAN:
+        card = CardResponse(
+            fit=Fit.OK,
+            route=Route.HUMAN,
+            reason=router_reply.reason,
+            content=HumanCardContent(
+                who_to_ask=router_reply.who_to_ask,
+                suggested_question=router_reply.suggested_question,
+                outdoor_action=router_reply.outdoor_action,
+            ),
+            request_id=request_id,
+            latency_ms=get_latency(),
+            is_mock=model_service.is_mock,
+        )
+        logger.info(
+            "request_id=%s route=%s latency_ms=%d",
+            request_id,
+            Route.HUMAN,
+            get_latency(),
+        )
+        return card
+
+    # Route is SEARCH
+    search_query = router_reply.search_query
+    search_url = _build_search_url(search_query)
+
+    sources = []
+    if serpapi_client is not None and serpapi_client.is_configured:
+        try:
+            sources = await serpapi_client.search(search_query, num_results=3)
+        except (
+            SerpApiTimeoutError,
+            SerpApiQuotaError,
+            SerpApiError,
+            SerpApiNotConfiguredError,
+        ) as err:
+            logger.warning("SerpApi lookup failed: %s", type(err).__name__)
+            sources = []
+
+    # If no results found or SerpApi unavailable -> return honest search_limitation
+    if not sources:
+        logger.info(
+            "request_id=%s fit=%s latency_ms=%d",
+            request_id,
+            Fit.SEARCH_LIMITATION,
+            get_latency(),
+        )
         return GuardResponse(
-            fit=Fit.SPLIT_REQUEST,
-            reason="Two separate needs in one question.",
-            message="Ask one thing at a time: either how to join, or where/when to find one.",
+            fit=Fit.SEARCH_LIMITATION,
+            reason="Public search results were unavailable or empty.",
+            message=(
+                "We couldn't confirm fresh public listings or hours automatically. "
+                "Check the search link directly before heading out."
+            ),
+            search_url=search_url,
             request_id=request_id,
             latency_ms=get_latency(),
+            is_mock=model_service.is_mock,
         )
 
-    # Missing location context
-    is_missing_ctx = router_input.context == "none" or not router_input.context
-    is_location_q = any(k in q_lower for k in ["near me", "which is open", "open nearby"])
-    if is_missing_ctx and is_location_q and "campus" not in q_lower:
-        return GuardResponse(
-            fit=Fit.CONTEXT_REQUEST,
-            reason="Promising goal, missing location context.",
-            message="Which area or place will you be near?",
-            request_id=request_id,
-            latency_ms=get_latency(),
-        )
+    # We have results: run search summary with base model
+    search_results = [SearchResult(title=s.title, snippet=s.snippet, link=s.url) for s in sources]
 
-    # Stale or conflicting evidence (R24)
-    if "stale" in q_lower or "definitely on" in q_lower:
-        import urllib.parse
+    summary_reply = await model_service.summarize_search(
+        router_input.question,
+        router_input.context if router_input.context != "none" else None,
+        search_results,
+        get_remaining_budget(),
+    )
 
-        query = router_input.question.replace("?", "").strip()
-        encoded = urllib.parse.quote_plus(query)
-        return GuardResponse(
-            fit="search_limitation",
-            reason="Listing may be stale or conflicting; live confirmation cannot be guaranteed.",
-            message="Evidence is missing, stale, or conflicting. Check public sources directly.",
-            search_url=f"https://www.google.com/search?q={encoded}",
-            request_id=request_id,
-            latency_ms=get_latency(),
-        )
+    summary_text = None
+    local_tip = None
 
-    # ── Step 5: Handler ─────────────────────────────────────────────
-    human_keywords = [
-        "regular",
-        "buy",
-        "like week to week",
-        "actually like",
-        "actually eat",
-        "college club",
-        "loop",
-        "what is this campus club",
-        "beginner",
-        "first-timer",
-        "sketching group",
-        "maker",
-        "volunteer",
-        "music jam",
-        "book-swap",
-        "book swap",
-        "returning to",
-        "students here",
-    ]
-    search_keywords = [
-        "where",
-        "when",
-        "hours",
-        "meeting",
-        "free entry",
-        "workshop",
-        "open today",
-        "listed",
-        "is it open",
-    ]
+    if summary_reply.status == SummaryStatus.ANSWERED and summary_reply.summary is not None:
+        ungrounded = ungrounded_numbers(summary_reply, search_results)
+        if not ungrounded:
+            summary_text = summary_reply.summary
+            local_tip = summary_reply.local_tip
+        else:
+            logger.warning("Search summary contained ungrounded numbers; treating as unclear")
 
-    if any(k in q_lower for k in human_keywords):
-        # Route: HUMAN (Task A04 per S11)
-        return handle_human_route(
-            router_input=router_input,
-            reason="Lived or tacit knowledge from a plausible person nearby.",
-            request_id=request_id,
-            latency_ms=get_latency(),
-        )
-
-    if any(k in q_lower for k in search_keywords):
-        # Route: SEARCH (Task A03: brief web-search action/link, live SerpApi if configured)
-        return await handle_search_route(
-            router_input=router_input,
-            reason="Fresh public fact requirement (schedule, hours, or listings).",
-            request_id=request_id,
-            latency_ms=get_latency(),
-            serpapi_client=serpapi_client,
-        )
-
-    # Route: AI (Task A03: brief answer path for practical know-how)
-    return handle_ai_route(
-        router_input=router_input,
-        reason="Stable practical know-how for trying or joining something.",
+    card = CardResponse(
+        fit=Fit.OK,
+        route=Route.SEARCH,
+        reason=router_reply.reason,
+        content=SearchCardContent(
+            search_query=search_query,
+            sources=sources,
+            search_url=search_url,
+            outdoor_action=router_reply.outdoor_action,
+            summary=summary_text,
+            local_tip=local_tip,
+        ),
         request_id=request_id,
         latency_ms=get_latency(),
+        is_mock=model_service.is_mock,
     )
+    logger.info(
+        "request_id=%s route=%s latency_ms=%d",
+        request_id,
+        Route.SEARCH,
+        get_latency(),
+    )
+    return card

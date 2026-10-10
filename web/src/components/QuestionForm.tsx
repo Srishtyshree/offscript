@@ -63,6 +63,12 @@ const EXAMPLES: ExamplePrompt[] = [
     tagLabel: 'Know how',
     icon: '💡',
   },
+  {
+    question: 'What is photosynthesis?',
+    tag: 'ai',
+    tagLabel: 'Know how',
+    icon: '💡',
+  },
 ]
 
 export const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, isLoading }) => {

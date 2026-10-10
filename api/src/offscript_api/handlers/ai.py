@@ -21,40 +21,35 @@ def generate_ai_card_content(question: str, context: str | None = None) -> AiCar
             "Wait for a pause between games, approach politely, and ask if you can "
             "call next round. Most courts run next-game rules."
         )
-        only_out_there = "Whether a game is currently playing and player readiness."
-        do_this = "Walk up to the court side and wait for the current game to pause."
+        outdoor_action = "Walk up to the court side and wait for the current game to pause."
 
     elif any(k in q_lower for k in ["birdwatch", "bird watching", "bird"]):
         answer = (
             "Focus on tree canopies and water margins. Move slowly, pause every few "
             "paces, and listen for rustling before scanning with your eyes."
         )
-        only_out_there = "Which birds are active in the branches right now."
-        do_this = "Head to the tree line or water edge and stay still for three minutes."
+        outdoor_action = "Head to the tree line or water edge and stay still for three minutes."
 
     elif any(k in q_lower for k in ["soil", "garden", "water", "plant"]):
         answer = (
             "Push your finger two inches into the soil. If it feels dry and warm, "
             "it needs water; if cool and damp, leave it."
         )
-        only_out_there = "The actual moisture depth beneath the top layer."
-        do_this = "Walk over to a garden bed and test the soil with your index finger."
+        outdoor_action = "Walk over to a garden bed and test the soil with your index finger."
 
     elif any(k in q_lower for k in ["sketch", "drawing", "paint"]):
         answer = (
             "Pick a single distinct subject with simple shadows. Sketch rough bounding "
             "shapes in light lines before committing to dark contours."
         )
-        only_out_there = "How natural light and shadows fall on the scene right now."
-        do_this = "Find a bench facing an interesting subject and sketch its basic outline."
+        outdoor_action = "Find a bench facing an interesting subject and sketch its basic outline."
 
     elif any(k in q_lower for k in ["run club", "running club", "group run"]):
         answer = (
             "Arrive ten minutes early and look for the person holding a clipboard "
             "or giving announcements. Introduce yourself as a newcomer."
         )
-        only_out_there = "The group's actual pace, size, and mood today."
-        do_this = "Head to the meeting point ten minutes before start time."
+        outdoor_action = "Head to the meeting point ten minutes before start time."
 
     else:
         # Default practical know-how pattern
@@ -62,13 +57,11 @@ def generate_ai_card_content(question: str, context: str | None = None) -> AiCar
             "Approach at a natural break in activity, introduce yourself with a single "
             "clear question, and observe the group rhythm first."
         )
-        only_out_there = "The current atmosphere and who is open to talking."
-        do_this = "Walk up to the area and observe for two minutes before stepping in."
+        outdoor_action = "Walk up to the area and observe for two minutes before stepping in."
 
     return AiCardContent(
         answer=answer,
-        only_out_there=only_out_there,
-        do_this=do_this,
+        outdoor_action=outdoor_action,
     )
 
 

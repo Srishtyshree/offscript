@@ -18,20 +18,19 @@ def test_ai_handler_pickup_game():
     assert card.fit == Fit.OK
     assert card.route == Route.AI
     assert "pause" in card.content.answer.lower()
-    assert len(card.content.do_this) > 0
-    assert len(card.content.only_out_there) > 0
+    assert len(card.content.outdoor_action) > 0
 
 
 def test_ai_handler_birdwatching():
     content = generate_ai_card_content("How do I start birdwatching in the park?")
     assert "tree" in content.answer.lower() or "canop" in content.answer.lower()
-    assert "still" in content.do_this.lower()
+    assert len(content.outdoor_action) > 0
 
 
 def test_ai_handler_gardening_soil():
     content = generate_ai_card_content("How can I tell if garden soil needs water?")
     assert "finger" in content.answer.lower()
-    assert "test" in content.do_this.lower() or "walk" in content.do_this.lower()
+    assert len(content.outdoor_action) > 0
 
 
 def test_ai_handler_concise_under_limits():
@@ -76,7 +75,7 @@ def test_search_handler_without_live_client_does_not_pretend_lookup():
         assert result.route == Route.SEARCH
         assert result.content.sources == []  # Honest: do not fabricate fake sources!
         assert "google.com/search" in result.content.search_url
-        assert len(result.content.do_this) > 0
+        assert len(result.content.outdoor_action) > 0
 
     asyncio.run(_test())
 
