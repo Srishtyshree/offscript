@@ -1,13 +1,7 @@
-export type Fit =
-  | 'ok'
-  | 'scope_nudge'
-  | 'context_request'
-  | 'split_request'
-  | 'needs_detail'
-  | 'two_questions'
-  | 'safety_guidance'
-  | 'refusal'
-  | 'search_limitation'
+export type GuardFit =
+  'needs_detail' | 'two_questions' | 'safety_guidance' | 'refusal' | 'search_limitation'
+
+export type Fit = 'ok' | GuardFit
 
 export type Route = 'AI' | 'SEARCH' | 'HUMAN'
 

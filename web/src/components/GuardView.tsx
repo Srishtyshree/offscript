@@ -10,18 +10,13 @@ export const GuardView: React.FC<GuardViewProps> = ({ guard, onReset }) => {
   const { fit, message, reason, search_url } = guard
 
   const guardMeta: Record<string, { label: string; icon: string; themeClass: string }> = {
-    scope_nudge: {
-      label: 'Scope Nudge',
-      icon: '🌿',
-      themeClass: 'scope',
-    },
-    context_request: {
-      label: 'Context Required',
+    needs_detail: {
+      label: 'More Detail Needed',
       icon: '📍',
       themeClass: 'context',
     },
-    split_request: {
-      label: 'Split Request',
+    two_questions: {
+      label: 'Two Questions in One',
       icon: '🔀',
       themeClass: 'split',
     },

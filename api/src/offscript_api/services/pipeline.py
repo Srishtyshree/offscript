@@ -29,12 +29,14 @@ from offscript_contract.guard import GuardVerdict
 from offscript_contract.route_dto import (
     AiCardContent,
     CardResponse,
+    Fit,
+    GuardFit,
     GuardResponse,
     HumanCardContent,
     RouteResponseUnion,
     SearchCardContent,
 )
-from offscript_contract.router import Fit, Route, RouterInput
+from offscript_contract.router import Route, RouterInput
 from offscript_contract.search_summary import (
     SearchResult,
     SummaryStatus,
@@ -89,11 +91,11 @@ async def run_pipeline(
         logger.info(
             "request_id=%s fit=%s latency_ms=%d",
             request_id,
-            Fit.NEEDS_DETAIL,
+            GuardFit.NEEDS_DETAIL,
             get_latency(),
         )
         return GuardResponse(
-            fit=Fit.NEEDS_DETAIL,
+            fit=GuardFit.NEEDS_DETAIL,
             reason="Essential detail is missing.",
             message=guard_output.message or "Please provide more detail about what you want to do.",
             request_id=request_id,
@@ -105,11 +107,11 @@ async def run_pipeline(
         logger.info(
             "request_id=%s fit=%s latency_ms=%d",
             request_id,
-            Fit.TWO_QUESTIONS,
+            GuardFit.TWO_QUESTIONS,
             get_latency(),
         )
         return GuardResponse(
-            fit=Fit.TWO_QUESTIONS,
+            fit=GuardFit.TWO_QUESTIONS,
             reason="Two separate questions asked in one.",
             message=guard_output.message or "Please ask one question at a time.",
             request_id=request_id,
@@ -190,11 +192,11 @@ async def run_pipeline(
         logger.info(
             "request_id=%s fit=%s latency_ms=%d",
             request_id,
-            Fit.SEARCH_LIMITATION,
+            GuardFit.SEARCH_LIMITATION,
             get_latency(),
         )
         return GuardResponse(
-            fit=Fit.SEARCH_LIMITATION,
+            fit=GuardFit.SEARCH_LIMITATION,
             reason="Public search results were unavailable or empty.",
             message=(
                 "We couldn't confirm fresh public listings or hours automatically. "

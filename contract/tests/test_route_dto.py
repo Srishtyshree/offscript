@@ -7,12 +7,14 @@ from offscript_contract.route_dto import (
     AiCardContent,
     CardResponse,
     ErrorResponse,
+    Fit,
+    GuardFit,
     GuardResponse,
     RouteRequest,
     SearchCardContent,
     SearchSource,
 )
-from offscript_contract.router import Fit, Route
+from offscript_contract.router import Route
 
 
 def test_route_request_validation():
@@ -64,14 +66,14 @@ def test_card_response_search_serialization():
 
 def test_guard_response_serialization():
     guard = GuardResponse(
-        fit=Fit.SCOPE_NUDGE,
-        reason="Trivia or screen-complete question.",
-        message="Offscript is for something you want to do or find out out there.",
+        fit=GuardFit.NEEDS_DETAIL,
+        reason="Missing essential details to route question.",
+        message="Which area or court are you referring to?",
         request_id="req_789",
         latency_ms=10,
     )
     assert guard.kind == "guard"
-    assert guard.fit == Fit.SCOPE_NUDGE
+    assert guard.fit == GuardFit.NEEDS_DETAIL
     assert guard.route is None
 
 

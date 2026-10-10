@@ -143,13 +143,13 @@ describe('submitRouteRequest API client (Task A06)', () => {
     }
   })
 
-  it('successfully returns GuardResponse (scope_nudge, context_request, search_limitation)', async () => {
+  it('successfully returns GuardResponse (needs_detail, search_limitation)', async () => {
     const guardResponse: GuardResponse = {
       kind: 'guard',
-      fit: 'scope_nudge',
+      fit: 'needs_detail',
       route: null,
-      reason: 'Trivia question.',
-      message: 'Offscript is for physical intentions out there.',
+      reason: 'Essential detail is missing.',
+      message: 'Which campus are you referring to?',
       request_id: 'req_guard',
       latency_ms: 8,
     }
@@ -160,12 +160,12 @@ describe('submitRouteRequest API client (Task A06)', () => {
       text: async () => JSON.stringify(guardResponse),
     } as unknown as Response)
 
-    const res = await submitRouteRequest('What is photosynthesis?')
+    const res = await submitRouteRequest('Where is a good cafe?')
     expect(res.kind).toBe('guard')
     if (res.kind === 'guard') {
-      expect(res.fit).toBe('scope_nudge')
+      expect(res.fit).toBe('needs_detail')
       expect(res.route).toBeNull()
-      expect(res.message).toContain('Offscript is for physical intentions')
+      expect(res.message).toContain('Which campus')
     }
   })
 

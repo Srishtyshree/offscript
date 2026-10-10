@@ -137,13 +137,13 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
   })
 
   describe('GuardView component', () => {
-    it('renders scope_nudge message and ask another question button', () => {
+    it('renders needs_detail message and ask another question button', () => {
       const guard: GuardResponse = {
         kind: 'guard',
-        fit: 'scope_nudge',
+        fit: 'needs_detail',
         route: null,
-        reason: 'Trivia question',
-        message: 'Offscript is for physical intentions out there.',
+        reason: 'Essential detail is missing',
+        message: 'Which campus are you referring to?',
         request_id: 'req_3',
         latency_ms: 5,
       }
@@ -154,9 +154,9 @@ describe('Frontend Component & View Integrations (Task A06)', () => {
           onReset: () => {},
         }),
       )
-      expect(html).toContain('Scope Nudge')
-      expect(html).toContain('Offscript is for physical intentions out there.')
-      expect(html).toContain('Trivia question')
+      expect(html).toContain('More Detail Needed')
+      expect(html).toContain('Which campus are you referring to?')
+      expect(html).toContain('Essential detail is missing')
       expect(html).toContain('Ask another question')
     })
 

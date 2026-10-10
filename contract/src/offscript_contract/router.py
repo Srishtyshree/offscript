@@ -49,20 +49,6 @@ class Route(StrEnum):
     HUMAN = "HUMAN"
 
 
-class Fit(StrEnum):
-    """Routing fit outcomes matching AGENTS.md guard and router states."""
-
-    OK = "ok"
-    SCOPE_NUDGE = "scope_nudge"
-    CONTEXT_REQUEST = "context_request"
-    SPLIT_REQUEST = "split_request"
-    NEEDS_DETAIL = "needs_detail"
-    TWO_QUESTIONS = "two_questions"
-    SAFETY_GUIDANCE = "safety_guidance"
-    REFUSAL = "refusal"
-    SEARCH_LIMITATION = "search_limitation"
-
-
 class _RouterReply(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 

@@ -21,6 +21,13 @@ def test_emergency_suicide():
     assert "emergency" in result.message.lower() or "911" in result.message
 
 
+def test_emergency_end_my_life():
+    result = check_safety(_make_input("I want to end my life"), "req_1b", 1)
+    assert result is not None
+    assert result.fit == "safety_guidance"
+    assert "emergency" in result.message.lower() or "911" in result.message
+
+
 def test_emergency_ambulance():
     result = check_safety(_make_input("Should I call an ambulance?"), "req_2", 1)
     assert result is not None

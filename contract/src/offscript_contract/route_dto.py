@@ -3,11 +3,33 @@
 Strict schemas matching AGENTS.md section B3 & B4.
 """
 
+from enum import StrEnum
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from offscript_contract.router import Fit, Route
+from offscript_contract.router import Route
+
+
+class GuardFit(StrEnum):
+    """Guard outcome labels for POST /api/route."""
+
+    NEEDS_DETAIL = "needs_detail"
+    TWO_QUESTIONS = "two_questions"
+    SAFETY_GUIDANCE = "safety_guidance"
+    REFUSAL = "refusal"
+    SEARCH_LIMITATION = "search_limitation"
+
+
+class Fit(StrEnum):
+    """Card and guard fit states."""
+
+    OK = "ok"
+    NEEDS_DETAIL = "needs_detail"
+    TWO_QUESTIONS = "two_questions"
+    SAFETY_GUIDANCE = "safety_guidance"
+    REFUSAL = "refusal"
+    SEARCH_LIMITATION = "search_limitation"
 
 
 class RouteRequest(BaseModel):
@@ -88,16 +110,7 @@ class GuardResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     kind: Literal["guard"] = "guard"
-    fit: Literal[
-        Fit.SCOPE_NUDGE,
-        Fit.CONTEXT_REQUEST,
-        Fit.SPLIT_REQUEST,
-        Fit.NEEDS_DETAIL,
-        Fit.TWO_QUESTIONS,
-        "safety_guidance",
-        "refusal",
-        "search_limitation",
-    ]
+    fit: GuardFit
     route: None = None
     reason: str
     message: str
