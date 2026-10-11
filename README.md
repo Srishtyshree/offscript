@@ -22,7 +22,7 @@ It is designed for a phone. Ask it about something you want to do nearby and see
 
 **[Offscript on GitHub](https://github.com/bhavishyaone/offscript)**
 
-Built with [@bhavishyaone](https://github.com/bhavishyaone) and [@srishtyshree](https://github.com/Srishtyshree). I’m [@whysocrisp](https://dev.to/whysocrisp) ([@iNotSoCrisp](https://github.com/iNotSoCrisp)).
+Built with [@bhavishyaone](https://github.com/bhavishyaone) and [@srishtyshree](https://github.com/Srishtyshree) ([@iNotSoCrisp](https://github.com/iNotSoCrisp)).
 
 ## How I Built It
 
