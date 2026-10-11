@@ -1,6 +1,58 @@
-# Offscript
+# Offscript: AI that knows when to stop answering
 
-A mobile-first web app that turns a question about something you want to do nearby into the shortest useful path off the screen. A fine-tuned open-weight model picks one source (**AI**, **SEARCH** or **HUMAN**), and the app returns one short card with one real-world step.
+> *This is a submission for the Hacktoberfest Open-Source AI Challenge Week 1: Touch Grass.*
+
+## What I Built
+
+We built Offscript, a mobile web app for questions that should lead you into the world around you. It is especially useful when you want to do something nearby, but the answer depends on a place or the people there.
+
+Say you see a group playing football at a park and want to join. An AI cannot know whether that group welcomes newcomers. When we asked Offscript, it suggested asking a player: “Is there room for a newcomer in this game?” That gives you a way to walk over and find out for yourself.
+
+The screen should be the shortest part of that experience. Offscript helps you take the next step, then leaves the conversation to you.
+
+You can ask it general questions too. It answers those normally, and it can search when a current fact matters. It suggests a physical step when that step would actually help.
+
+## Demo
+
+**[Try Offscript](https://offscript-web.onrender.com)**
+
+It is designed for a phone. Ask it about something you want to do nearby and see where it sends you next.
+
+## Code
+
+**[Offscript on GitHub](https://github.com/bhavishyaone/offscript)**
+
+Built with [@bhavishyaone](https://github.com/bhavishyaone) and [@srishtyshree](https://github.com/Srishtyshree). I’m [@whysocrisp](https://dev.to/whysocrisp) ([@iNotSoCrisp](https://github.com/iNotSoCrisp)).
+
+## How I Built It
+
+The difficult part was deciding where an answer should come from. “When does this group usually play?” and “Can I join them right now?” might mention the same park and the same game, but they need different responses.
+
+We fine-tuned the open-weight Qwen3.5-9B model with LoRA through Tinker. We trained it twice: first on a smaller question set, then on 1,085 examples covering nearby and general questions, different ways of asking them, and cases where an outdoor step would make no sense. The model chooses whether to answer, search, or direct the user to a person. It can include a physical action when one is useful.
+
+The app uses React and TypeScript on the frontend and FastAPI on the backend. SerpApi provides current search results, and the app is deployed on Render.
+
+In our 110-question offline check, the fine-tuned model chose the intended source for 110 questions, compared with 103 for the untuned model. Unnecessary physical steps fell from 9 to 1 across 41 questions where none was expected. An older 32-question check still found three misses, particularly around questions about specific venues. Both results are in the repository.
+
+## Why Does Open Innovation Matter?
+
+Offscript can fail in two very believable ways. It can confidently answer for people it has never met, or it can send someone outside when a short answer would have done the job. Either mistake makes the app less useful.
+
+Using an open-weight model let us train that decision directly. We could write examples where the answer belongs to the model, to a current source, or to someone in the real world, then check whether training changed its choices. That gave us something more useful than a prompt telling an AI to encourage people to go outside.
+
+The code, training material, and evaluations are public. Other people can inspect the choices we made, find cases we missed, and improve them. That is especially valuable for an app built around places and people our team cannot possibly know firsthand.
+
+## My Agent Session
+
+We did not record the build with DevRelay, so we do not have a session to embed. The repository has the code, training material, and evaluation results.
+
+## Prize Categories
+
+- **Best Use of Tinker**
+- **Best Use of SerpApi**
+- **Best Use of Render**
+
+---
 
 **Contributors and coding agents: read [AGENTS.md](AGENTS.md) first.**
 
