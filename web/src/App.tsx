@@ -9,6 +9,7 @@ import { LoadingPage } from './components/LoadingPage'
 import { SuggestionsView } from './components/SuggestionsView'
 import { ReportResultPage } from './components/ReportResultPage'
 import { LandingPage } from './components/LandingPage'
+import { InstallPrompt } from './components/InstallPrompt'
 
 type Screen = 'landing' | 'form' | 'loading' | 'suggestions' | 'report'
 
@@ -126,6 +127,8 @@ export function App() {
           />
         )}
       </main>
+
+      <InstallPrompt />
 
       <footer className="app-footer">Offscript · One intention nearby · Get off the screen</footer>
     </>
